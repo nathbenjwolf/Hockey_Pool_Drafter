@@ -1,2 +1,2 @@
-# Hockey_Pool_Drafter
+# Fantasy Hockey Pool Drafter
 A simple fantasy hockey pool drafting application
