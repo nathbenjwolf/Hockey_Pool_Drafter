@@ -42,10 +42,20 @@ class TabDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
 
+        self.teams = {  1: "Team A",
+                        2: "Team B",
+                        3: "Team C"}
+
+        self.draft_order = [3,2,1]
+
+        self.teams_players = {}
+        for team_num in self.teams.keys():
+            self.teams_players[team_num] = []
+
         tabWidget = QtGui.QTabWidget()
-        tabWidget.addTab(DraftTab.DraftTab(), self.tr("Draft"))
-        tabWidget.addTab(TeamTab.TeamTab(), self.tr("Team"))
-        tabWidget.addTab(ConfigTab.ConfigTab(), self.tr("Config"))
+        tabWidget.addTab(DraftTab.DraftTab(parent=self), self.tr("Draft"))
+        tabWidget.addTab(TeamTab.TeamTab(parent=self), self.tr("Team"))
+        tabWidget.addTab(ConfigTab.ConfigTab(parent=self), self.tr("Config"))
 
         okButton = QtGui.QPushButton(self.tr("OK"))
         cancelButton = QtGui.QPushButton(self.tr("Cancel"))
