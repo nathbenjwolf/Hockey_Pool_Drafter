@@ -7,6 +7,7 @@ from PySide import QtCore
 import DraftTab
 import TeamTab
 import ConfigTab
+import PoolData
 
 # def main():
 #
@@ -38,24 +39,22 @@ import ConfigTab
 #     def greetings(self):
 #         print ("Hello %s" % self.edit.text())
 
+
+
 class TabDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
 
-        self.teams = {  1: "Team A",
-                        2: "Team B",
-                        3: "Team C"}
+        self.pool_data = PoolData.PoolData()
 
-        self.draft_order = [3,2,1]
-
-        self.teams_players = {}
-        for team_num in self.teams.keys():
-            self.teams_players[team_num] = []
+        self.draft_tab = DraftTab.DraftTab(parent=self)
+        self.team_tab = TeamTab.TeamTab(parent=self)
+        self.config_tab = ConfigTab.ConfigTab(parent=self)
 
         tabWidget = QtGui.QTabWidget()
-        tabWidget.addTab(DraftTab.DraftTab(parent=self), self.tr("Draft"))
-        tabWidget.addTab(TeamTab.TeamTab(parent=self), self.tr("Team"))
-        tabWidget.addTab(ConfigTab.ConfigTab(parent=self), self.tr("Config"))
+        tabWidget.addTab(self.draft_tab, self.tr("Draft"))
+        tabWidget.addTab(self.team_tab, self.tr("Team"))
+        tabWidget.addTab(self.config_tab, self.tr("Config"))
 
         okButton = QtGui.QPushButton(self.tr("OK"))
         cancelButton = QtGui.QPushButton(self.tr("Cancel"))
@@ -74,6 +73,9 @@ class TabDialog(QtGui.QDialog):
         self.setLayout(mainLayout)
 
         self.setWindowTitle(self.tr("Fantasy Hockey Pool"))
+
+    def playerDrafted(self, team_num, player):
+        self.team_tab.updateTeam(team_num)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

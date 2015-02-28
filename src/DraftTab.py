@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 import sys
 from PySide import QtGui, QtCore
@@ -30,13 +29,13 @@ class DraftedPlayer(QtGui.QWidget):
 class DraftTab(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.data = parent
+        self.parent = parent
+        self.data = parent.pool_data
 
         main_layout = QtGui.QVBoxLayout()
 
         # Draft History
         self.list = QtGui.QListWidget()
-        #self.model = QtGui.QStandardItemModel()
 
         # Next Pick
         self.round_num = 0
@@ -47,11 +46,8 @@ class DraftTab(QtGui.QWidget):
         self.player_input = QtGui.QLineEdit()
         self.position_input = QtGui.QComboBox()
 
-        draft_history = self.draftHistoryView()
-        next_pick = self.nextPickView()
-
-        main_layout.addWidget(draft_history)
-        main_layout.addWidget(next_pick)
+        main_layout.addWidget(self.draftHistoryView())
+        main_layout.addWidget(self.nextPickView())
         self.setLayout(main_layout)
 
     def draftHistoryView(self):
@@ -59,7 +55,6 @@ class DraftTab(QtGui.QWidget):
         self.list.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.list.setStyleSheet("QListView { alternate-background-color: lightgrey; }")
         self.list.setAlternatingRowColors(True)
-        #self.list.setModel(self.model)
 
         return self.list
 
@@ -124,7 +119,11 @@ class DraftTab(QtGui.QWidget):
 
     def draftPlayer(self):
         player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, self.player_input.text(), self.position_input.currentText())
-        self.data.teams_players[player.team].append(player)
+        if(self.data.canDraftPlayer(player.team, player)):
+            self.data.teams_players[player.team].append(player)
+        else:
+            # Cannot draft player for some reason (player already drafted, or that team can't draft that position anymore)
+            return
 
         drafted_player = DraftedPlayer(player.overall_draft_num, self.getRound(), self.getPickingTeam(), player.name, player.pos)
         myQListWidgetItem = QtGui.QListWidgetItem(self.list)
@@ -132,6 +131,7 @@ class DraftTab(QtGui.QWidget):
         self.list.addItem(myQListWidgetItem)
         self.list.setItemWidget(myQListWidgetItem, drafted_player)
 
+        self.parent.playerDrafted(player.team, player)
         self.getNextPick()
 
         self.list.scrollToBottom()
