@@ -77,6 +77,13 @@ class TabDialog(QtGui.QDialog):
     def playerDrafted(self, team_num, player):
         self.team_tab.updateTeam(team_num)
 
+    def renameTeam(self, team_num):
+        self.draft_tab.renameTeam(team_num)
+
+    def draftReordered(self):
+        self.draft_tab.picking_team = self.pool_data.draft_order[self.draft_tab.round_pick]
+        self.draft_tab.updatePickView()
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 

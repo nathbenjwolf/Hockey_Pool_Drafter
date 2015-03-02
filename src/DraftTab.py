@@ -6,13 +6,16 @@ from Player import Player
 
 
 class DraftedPlayer(QtGui.QWidget):
-    def __init__(self, pick_num, round_num, team, player, pos, parent=None):
+    def __init__(self, pick_num, round_num, team_num, player, pos, parent):
         super(DraftedPlayer, self).__init__(parent)
+        self.data = parent.data
+        self.team_num = team_num
+
         self.allQHBoxLayout = QtGui.QHBoxLayout()
 
         self.pick_num_label = QtGui.QLabel(str(pick_num))
         self.round_num_label = QtGui.QLabel(str(round_num))
-        self.team_label = QtGui.QLabel(team)
+        self.team_label = QtGui.QLabel(self.data.teams[self.team_num])
         self.player_label = QtGui.QLabel(player)
         self.position_label = QtGui.QLabel(pos)
 
@@ -22,8 +25,10 @@ class DraftedPlayer(QtGui.QWidget):
         self.allQHBoxLayout.addWidget(self.player_label, 10)
         self.allQHBoxLayout.addWidget(self.position_label, 0)
 
-
         self.setLayout(self.allQHBoxLayout)
+
+    def updateName(self):
+        self.team_label.setText(self.data.teams[self.team_num])
 
 
 class DraftTab(QtGui.QWidget):
@@ -77,10 +82,10 @@ class DraftTab(QtGui.QWidget):
         draft_player_btn = QtGui.QPushButton("Draft Player")
         draft_player_btn.clicked.connect(self.draftPlayer)
 
-        grid.addWidget(round_label, 1, 0)
-        grid.addWidget(self.round_num_label, 1, 1)
-        grid.addWidget(team_label, 1, 2)
-        grid.addWidget(self.picking_team_label, 1, 3)
+        grid.addWidget(team_label, 1, 0)
+        grid.addWidget(self.picking_team_label, 1, 1)
+        grid.addWidget(round_label, 1, 2)
+        grid.addWidget(self.round_num_label, 1, 3)
 
         grid.addWidget(player_label, 2, 0)
         grid.addWidget(self.player_input, 2, 1)
@@ -104,28 +109,43 @@ class DraftTab(QtGui.QWidget):
         return self.data.teams[self.picking_team]
 
     def getNextPick(self):
-        if self.round_pick+1 >= len(self.data.teams):
-            self.round_num += 1
-            self.round_pick = 0
+        if self.round_num % 2 == 0:
+            # even rounds go from head to tail of snake
+            if self.round_pick+1 >= len(self.data.teams):
+                self.round_num += 1
+                # next round is odd
+                self.round_pick = len(self.data.teams)-1
+            else:
+                self.round_pick += 1
         else:
-            self.round_pick += 1
+            # odd rounds go from tail to head of snake
+            if self.round_pick-1 < 0:
+                self.round_num += 1
+                # next round is even
+                self.round_pick = 0
+            else:
+                self.round_pick -= 1
 
         self.picking_team = self.data.draft_order[self.round_pick]
         self.updatePickView()
 
     def getOverallPickNum(self):
-        # Plus 1 to account for zero index
-        return self.round_num * len(self.data.teams) + self.round_pick + 1
+        if self.round_num % 2 == 0:
+            # Plus 1 to account for zero index
+            return self.round_num * len(self.data.teams) + self.round_pick + 1
+        else:
+            # Odd round (tail->head) need to account for
+            return self.round_num * len(self.data.teams) + (len(self.data.teams) - self.round_pick)
 
     def draftPlayer(self):
-        player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, self.player_input.text(), self.position_input.currentText())
-        if(self.data.canDraftPlayer(player.team, player)):
+        player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, self.player_input.text().__str__(), self.position_input.currentText().__str__())
+        if self.data.canDraftPlayer(player.team, player):
             self.data.teams_players[player.team].append(player)
         else:
             # Cannot draft player for some reason (player already drafted, or that team can't draft that position anymore)
             return
 
-        drafted_player = DraftedPlayer(player.overall_draft_num, self.getRound(), self.getPickingTeam(), player.name, player.pos)
+        drafted_player = DraftedPlayer(player.overall_draft_num, self.getRound(), self.picking_team, player.name, player.pos, self)
         myQListWidgetItem = QtGui.QListWidgetItem(self.list)
         myQListWidgetItem.setSizeHint(drafted_player.sizeHint())
         self.list.addItem(myQListWidgetItem)
@@ -135,3 +155,10 @@ class DraftTab(QtGui.QWidget):
         self.getNextPick()
 
         self.list.scrollToBottom()
+
+    def renameTeam(self, team_num):
+        self.updatePickView()
+        for i in range(self.list.count()):
+            drafted_player = self.list.itemWidget(self.list.item(i))
+            if drafted_player.team_num == team_num:
+                drafted_player.updateName()

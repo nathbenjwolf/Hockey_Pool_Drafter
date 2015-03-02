@@ -4,11 +4,11 @@ import sys
 class PoolData(object):
     def __init__(self):
 
-        self.teams = {  1: "Team A",
-                        2: "Team B",
-                        3: "Team C"}
+        self.teams = {  0: "Team A",
+                        1: "Team B",
+                        2: "Team C"}
 
-        self.draft_order = [3,2,1]
+        self.draft_order = [2,0,1]
 
         self.teams_players = {}
         for team_num in self.teams.keys():
@@ -60,3 +60,56 @@ class PoolData(object):
             return False
 
         return True
+
+    def draftHasStarted(self):
+        for team_num, team_players in self.teams_players.items():
+            if len(team_players) > 0:
+                return True
+
+        return False
+
+    def draftJustStarted(self):
+        num_players_drafted = 0
+        for team_num, team_players in self.teams_players.items():
+            num_players_drafted += len(team_players)
+
+        if num_players_drafted == 1:
+            return True
+        else:
+            return False
+
+    def renameTeam(self, team_num, new_name):
+        self.teams[team_num] = new_name
+
+    def reorderTeam(self, team_num, new_position):
+        # Cannot reorder the teams after the draft has started
+        if not self.draftHasStarted():
+            self.draft_order.remove(team_num)
+            self.draft_order.insert(new_position, team_num)
+
+    def createNewTeam(self, team_name):
+        # Cannot add a team after the draft has started
+        if not self.draftHasStarted():
+            team_num = self.getNewTeamNum()
+            self.teams[team_num] = team_name
+            self.teams_players[team_num] = []
+            self.draft_order.append(team_num)
+
+            return team_num
+        else:
+            return -1
+
+    def removeTeam(self, team_num):
+        # Cannot remove a team while the draft has started
+        if not self.draftHasStarted():
+            del self.teams[team_num]
+            del self.teams_players[team_num]
+            self.draft_order.remove(team_num)
+
+    def getNewTeamNum(self):
+        max_num = 0
+        for team in self.teams.keys():
+            if team > max_num:
+                max_num = team
+
+        return max_num+1
