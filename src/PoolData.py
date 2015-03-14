@@ -2,13 +2,15 @@ import sys
 
 
 class PoolData(object):
-    def __init__(self):
+    def __init__(self, parent):
+
+        self.parent = parent
 
         self.teams = {  0: "Team A",
                         1: "Team B",
                         2: "Team C"}
 
-        self.draft_order = [2,0,1]
+        self.draft_order = [2, 0, 1]
 
         self.teams_players = {}
         for team_num in self.teams.keys():
@@ -78,14 +80,22 @@ class PoolData(object):
         else:
             return False
 
+    def draftPlayer(self, player):
+        if self.canDraftPlayer(player.team, player):
+            self.teams_players[player.team].append(player)
+            self.parent.playerDrafted(player)
+
+
     def renameTeam(self, team_num, new_name):
         self.teams[team_num] = new_name
+        self.parent.renameTeam(team_num)
 
     def reorderTeam(self, team_num, new_position):
         # Cannot reorder the teams after the draft has started
         if not self.draftHasStarted():
             self.draft_order.remove(team_num)
             self.draft_order.insert(new_position, team_num)
+            self.parent.draftReordered()
 
     def createNewTeam(self, team_name):
         # Cannot add a team after the draft has started
@@ -95,9 +105,7 @@ class PoolData(object):
             self.teams_players[team_num] = []
             self.draft_order.append(team_num)
 
-            return team_num
-        else:
-            return -1
+            self.parent.addTeam(team_num)
 
     def removeTeam(self, team_num):
         # Cannot remove a team while the draft has started
@@ -105,6 +113,8 @@ class PoolData(object):
             del self.teams[team_num]
             del self.teams_players[team_num]
             self.draft_order.remove(team_num)
+
+            self.parent.removeTeam(team_num)
 
     def getNewTeamNum(self):
         max_num = 0

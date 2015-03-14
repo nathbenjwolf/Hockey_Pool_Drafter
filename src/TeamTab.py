@@ -153,37 +153,20 @@ class TeamTab(QtGui.QWidget):
         text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your teams new name:')
         if ok:
             self.data.renameTeam(self.selected_team, text.__str__())
-            self.updateTeam(self.selected_team)
-            self.updateSelectedTeam()
-            self.parent.renameTeam(self.selected_team)
 
     def reorder(self):
         new_position, ok = QtGui.QInputDialog.getInt(self, 'Input Dialog', 'Enter new drafting position for team: (starting at 1)',
                                              minValue=1, maxValue=len(self.data.teams))
         if ok:
             self.data.reorderTeam(self.selected_team, new_position-1)
-            # Repopulate the list (just easier)
-            self.team_list.clear()
-            self.populateTeamList()
-            self.parent.draftReordered()
 
     def add(self):
         text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your teams name:')
         if ok:
             team_num = self.data.createNewTeam(text.__str__())
-            if team_num != -1:
-                self.createTeamEntry(team_num)
-            else:
-                # Something went wrong
-                pass
 
     def remove(self):
-
         self.data.removeTeam(self.selected_team)
-        # Repopulate the list (just easier)
-        self.team_list.clear()
-        self.populateTeamList()
-        self.parent.draftReordered()
 
     def updateTeam(self, team_num):
         draft_order_num = self.data.draft_order.index(team_num)

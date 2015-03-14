@@ -45,7 +45,7 @@ class TabDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
 
-        self.pool_data = PoolData.PoolData()
+        self.pool_data = PoolData.PoolData(self)
 
         self.draft_tab = DraftTab.DraftTab(parent=self)
         self.team_tab = TeamTab.TeamTab(parent=self)
@@ -74,15 +74,45 @@ class TabDialog(QtGui.QDialog):
 
         self.setWindowTitle(self.tr("Fantasy Hockey Pool"))
 
-    def playerDrafted(self, team_num, player):
-        self.team_tab.updateTeam(team_num)
+    def playerDrafted(self, player):
+        # Draft tab
+        self.draft_tab.updatePlayerDrafted(player)
+
+        # Team tab
+        self.team_tab.updateTeam(player.team)
 
     def renameTeam(self, team_num):
+        # Draft tab
         self.draft_tab.renameTeam(team_num)
 
+        # Team tab
+        self.team_tab.updateTeam(team_num)
+
     def draftReordered(self):
-        self.draft_tab.picking_team = self.pool_data.draft_order[self.draft_tab.round_pick]
+        # Draft tab
+        self.draft_tab.picking_team = self.draft_tab.getPickingTeam()
         self.draft_tab.updatePickView()
+
+        # Team Tab: Repopulate the list (just easier)
+        self.team_tab.team_list.clear()
+        self.team_tab.populateTeamList()
+
+    def addTeam(self, team_num):
+        # Draft tab
+        self.draft_tab.picking_team = self.draft_tab.getPickingTeam()
+        self.draft_tab.updatePickView()
+
+        # Team tab
+        self.team_tab.createTeamEntry(team_num)
+
+    def removeTeam(self, team_num):
+        # Draft tab
+        self.draft_tab.picking_team = self.draft_tab.getPickingTeam()
+        self.draft_tab.updatePickView()
+
+        # Team tab: Repopulate the list (just easier)
+        self.team_tab.team_list.clear()
+        self.team_tab.populateTeamList()
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

@@ -45,7 +45,7 @@ class DraftTab(QtGui.QWidget):
         # Next Pick
         self.round_num = 0
         self.round_pick = 0
-        self.picking_team = self.data.draft_order[self.round_pick]
+        self.picking_team = self.getPickingTeam()
         self.round_num_label = QtGui.QLabel()
         self.picking_team_label = QtGui.QLabel()
         self.player_input = QtGui.QLineEdit()
@@ -99,14 +99,23 @@ class DraftTab(QtGui.QWidget):
 
     def updatePickView(self):
         self.round_num_label.setText(self.tr(str(self.getRound())))
-        self.picking_team_label.setText(self.tr(self.getPickingTeam()))
+        self.picking_team_label.setText(self.tr(self.getPickingTeamName()))
 
     def getRound(self):
         # Plus 1 to account for the zero index (visually more correct first = 1)
         return self.round_num+1
 
+    def getPickingTeamName(self):
+        if self.picking_team == -1:
+            return "<Must add teams>"
+        else:
+            return self.data.teams[self.picking_team]
+
     def getPickingTeam(self):
-        return self.data.teams[self.picking_team]
+        if len(self.data.teams) == 0:
+            return -1
+        else:
+            return self.data.draft_order[self.round_pick]
 
     def getNextPick(self):
         if self.round_num % 2 == 0:
@@ -139,19 +148,15 @@ class DraftTab(QtGui.QWidget):
 
     def draftPlayer(self):
         player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, self.player_input.text().__str__(), self.position_input.currentText().__str__())
-        if self.data.canDraftPlayer(player.team, player):
-            self.data.teams_players[player.team].append(player)
-        else:
-            # Cannot draft player for some reason (player already drafted, or that team can't draft that position anymore)
-            return
+        self.data.draftPlayer(player)
 
-        drafted_player = DraftedPlayer(player.overall_draft_num, self.getRound(), self.picking_team, player.name, player.pos, self)
+    def updatePlayerDrafted(self, player):
+        drafted_player = DraftedPlayer(player.overall_draft_num, player.draft_round+1, player.team, player.name, player.pos, self)
         myQListWidgetItem = QtGui.QListWidgetItem(self.list)
         myQListWidgetItem.setSizeHint(drafted_player.sizeHint())
         self.list.addItem(myQListWidgetItem)
         self.list.setItemWidget(myQListWidgetItem, drafted_player)
 
-        self.parent.playerDrafted(player.team, player)
         self.getNextPick()
 
         self.list.scrollToBottom()
