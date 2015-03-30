@@ -2,6 +2,8 @@
 
 import sys
 from PySide import QtGui
+import TeamPlayerPage
+from Globals import Globals
 
 
 class TeamEntry(QtGui.QWidget):
@@ -12,10 +14,15 @@ class TeamEntry(QtGui.QWidget):
         self.data = parent.data
 
         self.draft_order_label = QtGui.QLabel()
+        self.draft_order_label.setFont(Globals.medium_bold_font)
         self.team_name_label = QtGui.QLabel()
+        self.team_name_label.setFont(Globals.medium_font)
         self.forwards_label = QtGui.QLabel()
+        self.forwards_label.setFont(Globals.medium_font)
         self.defense_label = QtGui.QLabel()
+        self.defense_label.setFont(Globals.medium_font)
         self.goalies_label = QtGui.QLabel()
+        self.goalies_label.setFont(Globals.medium_font)
         self.updateWidgets()
 
         self.allQHBoxLayout.addWidget(self.draft_order_label, 1)
@@ -35,12 +42,12 @@ class TeamEntry(QtGui.QWidget):
         self.goalies_label.setText("G: " + str(g_remaining))
 
 class TeamTab(QtGui.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.parent = parent
         self.data = parent.pool_data
 
-        main_layout = QtGui.QVBoxLayout()
+        self.main_layout = QtGui.QStackedLayout()
 
         # Team list
         self.team_list = QtGui.QListWidget()
@@ -56,9 +63,18 @@ class TeamTab(QtGui.QWidget):
         self.selected_team_label = QtGui.QLabel()
         self.team_options_view = self.teamOptionsView()
 
-        main_layout.addWidget(self.team_list)
-        main_layout.addWidget(self.team_options_view)
-        self.setLayout(main_layout)
+        # TeamTab layout as a widget
+        team_tab_layout = QtGui.QVBoxLayout()
+        team_tab = QtGui.QWidget()
+        team_tab_layout.addWidget(self.team_list)
+        team_tab_layout.addWidget(self.team_options_view)
+        team_tab.setLayout(team_tab_layout)
+        self.main_layout.addWidget(team_tab)
+
+        # TeamPlayerPage (when inspect is pressed)
+        self.teamPlayerPage = None
+
+        self.setLayout(self.main_layout)
 
     def populateTeamList(self):
         for team_num in self.data.draft_order:
@@ -96,8 +112,8 @@ class TeamTab(QtGui.QWidget):
         self.remove_btn.clicked.connect(self.remove)
         self.setButtonStatus()
 
-        grid.addWidget(team_label, 1, 0)
-        grid.addWidget(self.selected_team_label, 1, 1)
+        grid.addWidget(team_label, 1, 0, 1, 1)
+        grid.addWidget(self.selected_team_label, 1, 1, 1, 4)
 
         grid.addWidget(self.inspect_btn, 2, 0)
         grid.addWidget(self.rename_btn, 2, 1)
@@ -147,21 +163,50 @@ class TeamTab(QtGui.QWidget):
             self.remove_btn.setEnabled(False)
 
     def inspect(self):
-        print("inspect")
+        if self.main_layout.count > 1:
+            self.main_layout.removeWidget(self.teamPlayerPage)
+
+        self.teamPlayerPage = TeamPlayerPage.TeamPlayerPage(self.selected_team, self)
+
+        self.main_layout.addWidget(self.teamPlayerPage)
+        self.main_layout.setCurrentIndex(1)
+
+    def returnToTeamPage(self):
+        if self.main_layout.count > 1:
+            self.main_layout.removeWidget(self.teamPlayerPage)
+
+        self.main_layout.setCurrentIndex(0)
+
 
     def rename(self):
-        text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your teams new name:')
+        dlg = QtGui.QInputDialog(self)
+        dlg.setInputMode(QtGui.QInputDialog.TextInput)
+        dlg.setLabelText('Enter your teams new name:')
+        dlg.setFont(Globals.small_font)
+        ok = dlg.exec_()
+        text = dlg.textValue()
         if ok:
             self.data.renameTeam(self.selected_team, text.__str__())
 
     def reorder(self):
-        new_position, ok = QtGui.QInputDialog.getInt(self, 'Input Dialog', 'Enter new drafting position for team: (starting at 1)',
-                                             minValue=1, maxValue=len(self.data.teams))
+        dlg = QtGui.QInputDialog(self)
+        dlg.setInputMode(QtGui.QInputDialog.IntInput)
+        dlg.setLabelText('Enter new drafting position for team: (starting at 1)')
+        dlg.setFont(Globals.small_font)
+        dlg.setIntMinimum(1)
+        dlg.setIntMaximum(len(self.data.teams))
+        ok = dlg.exec_()
+        new_position = dlg.intValue()
         if ok:
             self.data.reorderTeam(self.selected_team, new_position-1)
 
     def add(self):
-        text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your teams name:')
+        dlg = QtGui.QInputDialog(self)
+        dlg.setInputMode(QtGui.QInputDialog.TextInput)
+        dlg.setLabelText('Enter your teams name:')
+        dlg.setFont(Globals.small_font)
+        ok = dlg.exec_()
+        text = dlg.textValue()
         if ok:
             team_num = self.data.createNewTeam(text.__str__())
 
@@ -176,3 +221,5 @@ class TeamTab(QtGui.QWidget):
         if self.data.draftJustStarted():
             # May have to update buttons
             self.setButtonStatus()
+
+        self.updateSelectedTeam()

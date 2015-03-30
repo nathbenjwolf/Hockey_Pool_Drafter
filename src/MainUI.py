@@ -4,44 +4,15 @@
 import sys
 from PySide import QtGui
 from PySide import QtCore
+from Globals import Globals
 import DraftTab
 import TeamTab
 import ConfigTab
 import PoolData
 
-# def main():
-#
-#     app = QtGui.QApplication(sys.argv)
-#
-#     w = QtGui.QWidget()
-#     w.resize(250, 150)
-#     w.move(300, 300)
-#     w.setWindowTitle('Simple')
-#     w.show()
-#
-#     sys.exit(app.exec_())
 
-# class Form(QDialog):
-#     def __init__(self, parent=None):
-#         super(Form, self).__init__(parent)
-#         self.setWindowTitle("Fantasy Hockey Pool")
-#         self.edit = QLineEdit("Write name here")
-#         self.button = QPushButton("Press me")
-#         layout = QVBoxLayout()
-#         layout.addWidget(self.edit)
-#         layout.addWidget(self.button)
-#         # Set dialog layout
-#         self.setLayout(layout)
-#         # Add button signal to greetings slot
-#         self.button.clicked.connect(self.greetings)
-#
-#     # Greets the user
-#     def greetings(self):
-#         print ("Hello %s" % self.edit.text())
+class MainUI(QtGui.QDialog):
 
-
-
-class TabDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
 
@@ -51,10 +22,15 @@ class TabDialog(QtGui.QDialog):
         self.team_tab = TeamTab.TeamTab(parent=self)
         self.config_tab = ConfigTab.ConfigTab(parent=self)
 
-        tabWidget = QtGui.QTabWidget()
-        tabWidget.addTab(self.draft_tab, self.tr("Draft"))
-        tabWidget.addTab(self.team_tab, self.tr("Team"))
-        tabWidget.addTab(self.config_tab, self.tr("Config"))
+        self.tab_widget = QtGui.QTabWidget()
+        self.tab_widget.addTab(self.draft_tab, self.tr("Draft"))
+        self.tab_widget.addTab(self.team_tab, self.tr("Team"))
+        self.tab_widget.addTab(self.config_tab, self.tr("Config"))
+        self.tab_widget.setFont(Globals.medium_font)
+
+        self.tab_widget.currentChanged.connect(self.tabChanged)
+
+
 
         okButton = QtGui.QPushButton(self.tr("OK"))
         cancelButton = QtGui.QPushButton(self.tr("Cancel"))
@@ -68,11 +44,18 @@ class TabDialog(QtGui.QDialog):
         buttonLayout.addWidget(cancelButton)
 
         mainLayout = QtGui.QVBoxLayout()
-        mainLayout.addWidget(tabWidget)
+        mainLayout.addWidget(self.tab_widget)
         mainLayout.addLayout(buttonLayout)
         self.setLayout(mainLayout)
 
         self.setWindowTitle(self.tr("Fantasy Hockey Pool"))
+
+        self.resize(Globals.window_width, Globals.window_height)
+
+    def tabChanged(self):
+        if self.tab_widget.currentIndex() != 1:
+            # Is not the team tab (make sure to go back from the team specific page)
+            self.team_tab.returnToTeamPage()
 
     def playerDrafted(self, player):
         # Draft tab
@@ -117,6 +100,6 @@ class TabDialog(QtGui.QDialog):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 
-    tab_dialog = TabDialog()
+    tab_dialog = MainUI()
 
     sys.exit(tab_dialog.exec_())

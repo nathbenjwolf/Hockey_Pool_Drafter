@@ -3,6 +3,7 @@
 import sys
 from PySide import QtGui, QtCore
 from Player import Player
+from Globals import Globals
 
 
 class DraftedPlayer(QtGui.QWidget):
@@ -14,10 +15,15 @@ class DraftedPlayer(QtGui.QWidget):
         self.allQHBoxLayout = QtGui.QHBoxLayout()
 
         self.pick_num_label = QtGui.QLabel(str(pick_num))
+        self.pick_num_label.setFont(Globals.medium_bold_font)
         self.round_num_label = QtGui.QLabel(str(round_num))
+        self.round_num_label.setFont(Globals.medium_bold_font)
         self.team_label = QtGui.QLabel(self.data.teams[self.team_num])
+        self.team_label.setFont(Globals.medium_font)
         self.player_label = QtGui.QLabel(player)
+        self.player_label.setFont(Globals.medium_font)
         self.position_label = QtGui.QLabel(pos)
+        self.position_label.setFont(Globals.medium_font)
 
         self.allQHBoxLayout.addWidget(self.pick_num_label, 1)
         self.allQHBoxLayout.addWidget(self.round_num_label, 1)
