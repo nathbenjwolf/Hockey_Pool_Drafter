@@ -1,6 +1,6 @@
 __author__ = 'Nathan'
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 from Globals import Globals
 
 
@@ -11,7 +11,7 @@ class PlayerEntry(QtGui.QWidget):
         self.data = parent.data
         self.allQHBoxLayout = QtGui.QHBoxLayout()
 
-        self.draft_order_label = QtGui.QLabel(str(player.draft_round))
+        self.draft_order_label = QtGui.QLabel(str(player.draft_round+1))
         self.draft_order_label.setFont(Globals.medium_bold_font)
         self.player_name_label = QtGui.QLabel(player.name)
         self.player_name_label.setFont(Globals.medium_font)
@@ -19,10 +19,13 @@ class PlayerEntry(QtGui.QWidget):
         self.position_label.setFont(Globals.medium_font)
 
         self.allQHBoxLayout.addWidget(self.draft_order_label, 2)
-        self.allQHBoxLayout.addWidget(self.player_name_label, 10)
+        self.allQHBoxLayout.addWidget(self.player_name_label, 20)
         self.allQHBoxLayout.addWidget(self.position_label, 1)
 
         self.setLayout(self.allQHBoxLayout)
+
+    def updatePlayerName(self):
+        self.player_name_label.setText(self.player.name)
 
 
 class TeamPlayerPage(QtGui.QWidget):
@@ -71,6 +74,7 @@ class TeamPlayerPage(QtGui.QWidget):
 
         team_label = QtGui.QLabel(self.tr("Team: " + self.data.teams[self.team_num]))
         player_label = QtGui.QLabel(self.tr("Player:"))
+        player_label.setAlignment(QtCore.Qt.AlignRight)
         self.updateSelectedPlayer()
 
         self.rename_btn = QtGui.QPushButton("Rename")
@@ -120,9 +124,28 @@ class TeamPlayerPage(QtGui.QWidget):
                 self.selected_player = -1
                 self.selected_player_label.setText("(Select a Player)")
 
+        self.setButtonStatus()
+
+    def setButtonStatus(self):
+        pass
+
     # Button callbacks
     def rename(self):
         print "rename"
+        dlg = QtGui.QInputDialog(self)
+        dlg.setInputMode(QtGui.QInputDialog.TextInput)
+        dlg.setLabelText('Enter the new name of the player:')
+        dlg.setFont(Globals.small_font)
+        ok = dlg.exec_()
+        text = dlg.textValue()
+        if ok:
+            self.data.renamePlayer(self.team_num, self.selected_player, text.__str__())
+
+        # Specific to this page
+        renamed_player = self.player_list.itemWidget(self.player_list.item(self.selected_player))
+        renamed_player.updatePlayerName()
+
+        self.updateSelectedPlayer()
 
     def reposition(self):
         print "reposition"

@@ -97,6 +97,10 @@ class MainUI(QtGui.QDialog):
         self.team_tab.team_list.clear()
         self.team_tab.populateTeamList()
 
+    def renamePlayer(self, team_num, player_index):
+        # Draft tab
+        self.draft_tab.renamedPlayer(team_num, player_index)
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 

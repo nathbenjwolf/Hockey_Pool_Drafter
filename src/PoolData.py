@@ -123,3 +123,11 @@ class PoolData(object):
                 max_num = team
 
         return max_num+1
+
+    def renamePlayer(self, team_num, player_index, new_name):
+        player_list = self.teams_players[team_num]
+        player = player_list[player_index]
+
+        player.name = new_name
+
+        self.parent.renamePlayer(team_num, player_index)

@@ -11,12 +11,13 @@ class DraftedPlayer(QtGui.QWidget):
         super(DraftedPlayer, self).__init__(parent)
         self.data = parent.data
         self.team_num = team_num
+        self.round_num = round_num
 
         self.allQHBoxLayout = QtGui.QHBoxLayout()
 
         self.pick_num_label = QtGui.QLabel(str(pick_num))
         self.pick_num_label.setFont(Globals.medium_bold_font)
-        self.round_num_label = QtGui.QLabel(str(round_num))
+        self.round_num_label = QtGui.QLabel(str(self.round_num))
         self.round_num_label.setFont(Globals.medium_bold_font)
         self.team_label = QtGui.QLabel(self.data.teams[self.team_num])
         self.team_label.setFont(Globals.medium_font)
@@ -33,8 +34,11 @@ class DraftedPlayer(QtGui.QWidget):
 
         self.setLayout(self.allQHBoxLayout)
 
-    def updateName(self):
+    def updateTeamName(self):
         self.team_label.setText(self.data.teams[self.team_num])
+
+    def updatePlayerName(self):
+        self.player_label.setText(self.data.teams_players[self.team_num][self.round_num-1].name)
 
 
 class DraftTab(QtGui.QWidget):
@@ -167,9 +171,22 @@ class DraftTab(QtGui.QWidget):
 
         self.list.scrollToBottom()
 
+        self.player_input.clear()
+
     def renameTeam(self, team_num):
         self.updatePickView()
         for i in range(self.list.count()):
             drafted_player = self.list.itemWidget(self.list.item(i))
             if drafted_player.team_num == team_num:
-                drafted_player.updateName()
+                drafted_player.updateTeamName()
+
+    def renamedPlayer(self, team_num, player_index):
+        # player_index represents the number of rounds
+        if player_index % 2 == 0:
+            list_index = player_index*len(self.data.teams) + self.data.draft_order.index(team_num)
+        else:
+            list_index = player_index*len(self.data.teams) + len(self.data.teams) - (self.data.draft_order.index(team_num) + 1)
+
+        drafted_player = self.list.itemWidget(self.list.item(list_index))
+        drafted_player.updatePlayerName()
+
