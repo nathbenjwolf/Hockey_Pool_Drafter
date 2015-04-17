@@ -99,7 +99,14 @@ class MainUI(QtGui.QDialog):
 
     def renamePlayer(self, team_num, player_index):
         # Draft tab
-        self.draft_tab.renamedPlayer(team_num, player_index)
+        self.draft_tab.playerUpdate(team_num, player_index)
+
+    def repositionPlayer(self, team_num, player_index):
+        # Draft tab
+        self.draft_tab.playerUpdate(team_num, player_index)
+
+        # Team tab
+        self.team_tab.updateTeam(team_num)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

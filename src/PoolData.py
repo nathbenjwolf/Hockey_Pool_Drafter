@@ -131,3 +131,11 @@ class PoolData(object):
         player.name = new_name
 
         self.parent.renamePlayer(team_num, player_index)
+
+    def repositionPlayer(self, team_num, player_index, new_pos):
+        player_list = self.teams_players[team_num]
+        player = player_list[player_index]
+
+        player.pos = new_pos
+
+        self.parent.repositionPlayer(team_num, player_index)

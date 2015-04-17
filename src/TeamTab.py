@@ -94,7 +94,6 @@ class TeamTab(QtGui.QWidget):
         grid.setSpacing(10)
 
         team_label = QtGui.QLabel(self.tr("Team:"))
-        self.updateSelectedTeam()
 
         self.inspect_btn = QtGui.QPushButton("Inspect")
         self.inspect_btn.clicked.connect(self.inspect)
@@ -110,7 +109,7 @@ class TeamTab(QtGui.QWidget):
 
         self.remove_btn = QtGui.QPushButton("Remove")
         self.remove_btn.clicked.connect(self.remove)
-        self.setButtonStatus()
+        self.updateSelectedTeam()
 
         grid.addWidget(team_label, 1, 0, 1, 1)
         grid.addWidget(self.selected_team_label, 1, 1, 1, 4)
@@ -128,7 +127,6 @@ class TeamTab(QtGui.QWidget):
     def teamSelected(self):
         self.selected_team = self.team_list.itemWidget(self.team_list.currentItem()).team_num
         self.updateSelectedTeam()
-        self.setButtonStatus()
 
     def updateSelectedTeam(self):
         if self.selected_team == -1:
@@ -140,6 +138,8 @@ class TeamTab(QtGui.QWidget):
             except KeyError:
                 self.selected_team = -1
                 self.selected_team_label.setText("(Select a Team)")
+
+        self.setButtonStatus()
 
     def setButtonStatus(self):
         # Default them to enabled
@@ -217,9 +217,5 @@ class TeamTab(QtGui.QWidget):
         draft_order_num = self.data.draft_order.index(team_num)
         team = self.team_list.itemWidget(self.team_list.item(draft_order_num))
         team.updateWidgets()
-
-        if self.data.draftJustStarted():
-            # May have to update buttons
-            self.setButtonStatus()
 
         self.updateSelectedTeam()

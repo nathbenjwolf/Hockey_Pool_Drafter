@@ -24,8 +24,9 @@ class PlayerEntry(QtGui.QWidget):
 
         self.setLayout(self.allQHBoxLayout)
 
-    def updatePlayerName(self):
+    def updateLabels(self):
         self.player_name_label.setText(self.player.name)
+        self.position_label.setText(self.player.pos)
 
 
 class TeamPlayerPage(QtGui.QWidget):
@@ -75,7 +76,6 @@ class TeamPlayerPage(QtGui.QWidget):
         team_label = QtGui.QLabel(self.tr("Team: " + self.data.teams[self.team_num]))
         player_label = QtGui.QLabel(self.tr("Player:"))
         player_label.setAlignment(QtCore.Qt.AlignRight)
-        self.updateSelectedPlayer()
 
         self.rename_btn = QtGui.QPushButton("Rename")
         self.rename_btn.clicked.connect(self.rename)
@@ -83,25 +83,18 @@ class TeamPlayerPage(QtGui.QWidget):
         self.reposition_btn = QtGui.QPushButton("Reposition")
         self.reposition_btn.clicked.connect(self.reposition)
 
-        self.reorder_btn = QtGui.QPushButton("Reorder")
-        self.reorder_btn.clicked.connect(self.reorder)
-
-        self.remove_btn = QtGui.QPushButton("Remove")
-        self.remove_btn.clicked.connect(self.remove)
-
         self.back_btn = QtGui.QPushButton("Back")
         self.back_btn.clicked.connect(self.back)
-        #self.setButtonStatus()
 
-        grid.addWidget(team_label, 1, 0, 1, 2)
-        grid.addWidget(player_label, 1, 2, 1, 1)
-        grid.addWidget(self.selected_player_label, 1, 3, 1, 2)
+        self.updateSelectedPlayer()
+
+        grid.addWidget(team_label, 1, 0, 1, 1)
+        grid.addWidget(player_label, 1, 1, 1, 1)
+        grid.addWidget(self.selected_player_label, 1, 2, 1, 1)
 
         grid.addWidget(self.rename_btn, 2, 0)
         grid.addWidget(self.reposition_btn, 2, 1)
-        grid.addWidget(self.reorder_btn, 2, 2)
-        grid.addWidget(self.remove_btn, 2, 3)
-        grid.addWidget(self.back_btn, 2, 4)
+        grid.addWidget(self.back_btn, 2, 2)
 
         picking_group_box.setLayout(grid)
 
@@ -111,7 +104,6 @@ class TeamPlayerPage(QtGui.QWidget):
     def playerSelected(self):
         self.selected_player = self.player_list.itemWidget(self.player_list.currentItem()).player.draft_round
         self.updateSelectedPlayer()
-        #self.setButtonStatus()
 
     def updateSelectedPlayer(self):
         if self.selected_player == -1:
@@ -127,11 +119,17 @@ class TeamPlayerPage(QtGui.QWidget):
         self.setButtonStatus()
 
     def setButtonStatus(self):
-        pass
+        # Default them to enabled
+        self.rename_btn.setEnabled(True)
+        self.reposition_btn.setEnabled(True)
+
+        if self.selected_player == -1:
+            # No player selected
+            self.rename_btn.setEnabled(False)
+            self.reposition_btn.setEnabled(False)
 
     # Button callbacks
     def rename(self):
-        print "rename"
         dlg = QtGui.QInputDialog(self)
         dlg.setInputMode(QtGui.QInputDialog.TextInput)
         dlg.setLabelText('Enter the new name of the player:')
@@ -141,21 +139,29 @@ class TeamPlayerPage(QtGui.QWidget):
         if ok:
             self.data.renamePlayer(self.team_num, self.selected_player, text.__str__())
 
-        # Specific to this page
-        renamed_player = self.player_list.itemWidget(self.player_list.item(self.selected_player))
-        renamed_player.updatePlayerName()
+            # Specific to this page
+            renamed_player = self.player_list.itemWidget(self.player_list.item(self.selected_player))
+            renamed_player.updateLabels()
 
-        self.updateSelectedPlayer()
+            self.updateSelectedPlayer()
 
     def reposition(self):
-        print "reposition"
+        dlg = QtGui.QInputDialog(self)
+        dlg.setInputMode(QtGui.QInputDialog.TextInput)
+        dlg.setLabelText('Select players position:')
+        dlg.setFont(Globals.small_font)
+        dlg.setComboBoxItems(["F", "D", "G"])
+        ok = dlg.exec_()
+        new_position = dlg.textValue()
+        if ok:
+            self.data.repositionPlayer(self.team_num, self.selected_player, new_position)
 
-    def reorder(self):
-        print "reorder"
+            # Specific to this page
+            repositioned_player = self.player_list.itemWidget(self.player_list.item(self.selected_player))
+            repositioned_player.updateLabels()
 
-    def remove(self):
-        print "remove"
+            self.updateSelectedPlayer()
+
 
     def back(self):
-        print "back"
         self.parent.returnToTeamPage()

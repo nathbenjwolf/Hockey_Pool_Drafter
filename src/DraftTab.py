@@ -34,11 +34,10 @@ class DraftedPlayer(QtGui.QWidget):
 
         self.setLayout(self.allQHBoxLayout)
 
-    def updateTeamName(self):
+    def updateLabels(self):
         self.team_label.setText(self.data.teams[self.team_num])
-
-    def updatePlayerName(self):
         self.player_label.setText(self.data.teams_players[self.team_num][self.round_num-1].name)
+        self.position_label.setText(self.data.teams_players[self.team_num][self.round_num-1].pos)
 
 
 class DraftTab(QtGui.QWidget):
@@ -178,9 +177,9 @@ class DraftTab(QtGui.QWidget):
         for i in range(self.list.count()):
             drafted_player = self.list.itemWidget(self.list.item(i))
             if drafted_player.team_num == team_num:
-                drafted_player.updateTeamName()
+                drafted_player.updateLabels()
 
-    def renamedPlayer(self, team_num, player_index):
+    def playerUpdate(self, team_num, player_index):
         # player_index represents the number of rounds
         if player_index % 2 == 0:
             list_index = player_index*len(self.data.teams) + self.data.draft_order.index(team_num)
@@ -188,5 +187,5 @@ class DraftTab(QtGui.QWidget):
             list_index = player_index*len(self.data.teams) + len(self.data.teams) - (self.data.draft_order.index(team_num) + 1)
 
         drafted_player = self.list.itemWidget(self.list.item(list_index))
-        drafted_player.updatePlayerName()
+        drafted_player.updateLabels()
 
