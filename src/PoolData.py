@@ -1,4 +1,5 @@
 import sys
+from FileParser import FileParser
 
 
 class PoolData(object):
@@ -52,18 +53,11 @@ class PoolData(object):
         self.exportData()
 
     def importData(self):
-        f = open(self.import_path, 'r')
-
-        with f:
-            data = f.read()
-            print data
+        # TODO: Capture return values
+        FileParser.importData(self.import_path)
 
     def exportData(self):
-        f = open(self.export_path, 'w')
-
-        with f:
-            f.write("Hello World,")
-
+        FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_rounds, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
 
     def getRemainingPlayers(self, team_num):
         team_players = self.teams_players[team_num]
