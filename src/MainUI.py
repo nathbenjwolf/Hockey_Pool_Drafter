@@ -30,8 +30,6 @@ class MainUI(QtGui.QDialog):
 
         self.tab_widget.currentChanged.connect(self.tabChanged)
 
-
-
         okButton = QtGui.QPushButton(self.tr("OK"))
         cancelButton = QtGui.QPushButton(self.tr("Cancel"))
 
@@ -56,6 +54,17 @@ class MainUI(QtGui.QDialog):
         if self.tab_widget.currentIndex() != 1:
             # Is not the team tab (make sure to go back from the team specific page)
             self.team_tab.returnToTeamPage()
+
+    def totalsChanged(self):
+        # Team tab
+        self.team_tab.totalsChanged()
+
+    def draftJustStarted(self):
+        # Team tab
+        self.team_tab.setButtonStatus()
+
+        # Config tab
+        self.config_tab.draftStarted()
 
     def playerDrafted(self, player):
         # Draft tab

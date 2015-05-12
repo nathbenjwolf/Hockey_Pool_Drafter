@@ -219,3 +219,7 @@ class TeamTab(QtGui.QWidget):
         team.updateWidgets()
 
         self.updateSelectedTeam()
+
+    def totalsChanged(self):
+        for team_num in self.data.teams.keys():
+            self.updateTeam(team_num)

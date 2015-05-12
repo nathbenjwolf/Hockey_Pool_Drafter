@@ -19,6 +19,51 @@ class PoolData(object):
         self.num_forwards = 12
         self.num_defense = 6
         self.num_goalies = 2
+        self.num_rounds = 20
+        self.import_path = ""
+        self.export_path = ""
+
+    def setRounds(self, rounds):
+        if not self.draftHasStarted():
+            self.num_rounds = rounds
+            self.parent.totalsChanged()
+
+    def setForwards(self, forwards):
+        if not self.draftHasStarted():
+            self.num_forwards = forwards
+            self.parent.totalsChanged()
+
+    def setDefense(self, defense):
+        if not self.draftHasStarted():
+            self.num_defense = defense
+            self.parent.totalsChanged()
+
+    def setGoalies(self, goalies):
+        if not self.draftHasStarted():
+            self.num_goalies = goalies
+            self.parent.totalsChanged()
+
+    def setImportPath(self, file_path):
+        self.import_path = file_path
+        self.importData()
+
+    def setExportPath(self, file_path):
+        self.export_path = file_path
+        self.exportData()
+
+    def importData(self):
+        f = open(self.import_path, 'r')
+
+        with f:
+            data = f.read()
+            print data
+
+    def exportData(self):
+        f = open(self.export_path, 'w')
+
+        with f:
+            f.write("Hello World,")
+
 
     def getRemainingPlayers(self, team_num):
         team_players = self.teams_players[team_num]
@@ -54,11 +99,14 @@ class PoolData(object):
         if player.pos == "G":
             (_, _, remaining_picks) = self.getRemainingPlayers(team_num)
 
-        if(remaining_picks <= 0):
+        if remaining_picks <= 0:
             return False
 
         # check if a team has already drafted that player
-        if(self.isPlayerDrafted(player)):
+        if self.isPlayerDrafted(player):
+            return False
+
+        if len(self.teams_players[team_num]) >= self.num_rounds:
             return False
 
         return True
@@ -85,6 +133,8 @@ class PoolData(object):
             self.teams_players[player.team].append(player)
             self.parent.playerDrafted(player)
 
+            if self.draftJustStarted():
+                self.parent.draftJustStarted()
 
     def renameTeam(self, team_num, new_name):
         self.teams[team_num] = new_name
