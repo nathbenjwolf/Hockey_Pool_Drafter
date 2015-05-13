@@ -55,6 +55,16 @@ class MainUI(QtGui.QDialog):
             # Is not the team tab (make sure to go back from the team specific page)
             self.team_tab.returnToTeamPage()
 
+    def dataImported(self):
+        # Draft Tab
+        self.draft_tab.dataImported()
+
+        # Team Tab
+        self.team_tab.dataImported()
+
+        # Config Tab
+        self.config_tab.dataImported()
+
     def totalsChanged(self):
         # Team tab
         self.team_tab.totalsChanged()

@@ -77,19 +77,28 @@ class ConfigTab(QtGui.QWidget):
     def importFileSelection(self):
         fname, _ = QtGui.QFileDialog.getOpenFileName(self, 'Import File', 'FantasyHockeyDraftData.csv', '(*.csv)')
         if fname:
-            self.import_file_label.setText(fname)
             self.data.setImportPath(fname)
 
     def exportFileSelection(self):
         fdir = QtGui.QFileDialog.getExistingDirectory(self, 'Export File Location')
         if fdir:
             file_path = fdir.__str__() + '\FantasyHockeyDraftData.csv'
-            self.export_file_label.setText(file_path)
             self.data.setExportPath(file_path)
+            self.export_file_label.setText(self.data.export_path)
 
+    # Reactor
     def draftStarted(self):
         self.total_rounds_spinbox.setEnabled(False)
         self.total_forwards_spinbox.setEnabled(False)
         self.total_defensemen_spinbox.setEnabled(False)
         self.total_goalies_spinbox.setEnabled(False)
         self.import_file_selection.setEnabled(False)
+
+    # Reactor
+    def dataImported(self):
+        self.total_rounds_spinbox.setValue(self.data.num_rounds)
+        self.total_forwards_spinbox.setValue(self.data.num_forwards)
+        self.total_defensemen_spinbox.setValue(self.data.num_defense)
+        self.total_goalies_spinbox.setValue(self.data.num_goalies)
+        self.import_file_label.setText(self.data.import_path)
+        self.export_file_label.setText(self.data.export_path)

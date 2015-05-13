@@ -189,3 +189,26 @@ class DraftTab(QtGui.QWidget):
         drafted_player = self.list.itemWidget(self.list.item(list_index))
         drafted_player.updateLabels()
 
+    def dataImported(self):
+        # Import all the players in order
+        if len(self.data.teams_players) == 0:
+            return ""
+        draft_order = self.data.draft_order[:]
+        teams_players_string = ""
+        # One extra iteration encase not all teams have the same amount of players drafted
+        max_rounds = len(self.data.teams_players[self.data.teams_players.keys()[0]]) + 1
+
+        for round in range(0, max_rounds):
+            for team_num in draft_order:
+                assert (team_num in self.data.teams_players.keys()), "Draft order has a non-existent team"
+                try:
+                    self.updatePlayerDrafted(self.data.teams_players[team_num][round])
+
+                except IndexError:
+                    # Ignore if on last round or 2nd last round
+                    assert (round >= max_rounds-1), "Error when importing teams_players data to draft tab, " + str(team_num) + ":" + str(round)
+
+            # Reverse the order due to snake draft
+            draft_order.reverse()
+
+

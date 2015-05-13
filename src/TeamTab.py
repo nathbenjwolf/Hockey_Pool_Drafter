@@ -223,3 +223,14 @@ class TeamTab(QtGui.QWidget):
     def totalsChanged(self):
         for team_num in self.data.teams.keys():
             self.updateTeam(team_num)
+
+    # Reactor
+    def dataImported(self):
+        # Easier to rebuild team fields
+        self.team_list.clear()
+        self.populateTeamList()
+
+        # Reset selected team
+        self.selected_team == -1
+
+        self.setButtonStatus()

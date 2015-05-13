@@ -60,7 +60,7 @@ class FileParser(object):
         for token in line.split(','):
             team_tuple = token.split(':')
             team_num = int(team_tuple[0])
-            team_name = team_tuple[1]
+            team_name = team_tuple[1].strip('\n')
             teams[team_num] = team_name
 
         return teams
@@ -121,9 +121,10 @@ class FileParser(object):
         return teams_players
 
     @staticmethod
-    def __marshalTeamsPlayers(teams_players, draft_order):
+    def __marshalTeamsPlayers(teams_players, draft_order_original):
         if len(teams_players) == 0:
             return ""
+        draft_order = draft_order_original[:]
         teams_players_string = ""
         # One extra iteration encase not all teams have the same amount of players drafted
         max_rounds = len(teams_players[teams_players.keys()[0]]) + 1
@@ -138,6 +139,9 @@ class FileParser(object):
                 except IndexError:
                     # Ignore if on last round or 2nd last round
                     assert (round >= max_rounds-1), "Error with teams_players data, " + str(team_num) + ":" + str(round)
+
+            # Reverse the order due to snake draft
+            draft_order.reverse()
 
         return teams_players_string.strip(",")
 

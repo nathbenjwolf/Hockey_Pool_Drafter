@@ -45,16 +45,21 @@ class PoolData(object):
             self.parent.totalsChanged()
 
     def setImportPath(self, file_path):
-        self.import_path = file_path
-        self.importData()
+        if not self.draftHasStarted():
+            self.import_path = file_path
+            # Write to the file you used to import as the draft continues
+            self.export_path = file_path
+            self.importData()
 
     def setExportPath(self, file_path):
         self.export_path = file_path
         self.exportData()
 
     def importData(self):
-        # TODO: Capture return values
-        FileParser.importData(self.import_path)
+        self.teams, self.draft_order, self.num_rounds, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players = FileParser.importData(self.import_path)
+        self.parent.dataImported()
+        if self.draftHasStarted():
+            self.parent.draftJustStarted()
 
     def exportData(self):
         FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_rounds, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
@@ -100,6 +105,7 @@ class PoolData(object):
         if self.isPlayerDrafted(player):
             return False
 
+        # check if total rounds exhausted
         if len(self.teams_players[team_num]) >= self.num_rounds:
             return False
 
