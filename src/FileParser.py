@@ -45,14 +45,18 @@ class FileParser(object):
             f.write(totals_string)
             f.write('\n')
 
-            # Teama Players
+            # Teams Players
             teams_players_string = FileParser.__marshalTeamsPlayers(teams_players, draft_order)
             f.write(teams_players_string)
 
-    # def appendPlayer(self, filename, player):
-    #     f = open(filename, 'a')
-    #
-    #     with f:
+    @staticmethod
+    def appendPlayer(filename, player):
+        f = open(filename, 'a')
+
+        with f:
+
+            player_string = FileParser.__marshalPlayer(player)
+            f.write("," + player_string)
 
     @staticmethod
     def __unmarshalTeams(line):
@@ -114,9 +118,10 @@ class FileParser(object):
         for team_num in team_nums:
             teams_players[team_num] = []
 
-        for player_string in line.split(','):
-            player = FileParser.__unmarshalPlayer(player_string)
-            teams_players[player.team].append(player)
+        if line:
+            for player_string in line.split(','):
+                player = FileParser.__unmarshalPlayer(player_string)
+                teams_players[player.team].append(player)
 
         return teams_players
 

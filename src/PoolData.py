@@ -28,21 +28,25 @@ class PoolData(object):
         if not self.draftHasStarted():
             self.num_rounds = rounds
             self.parent.totalsChanged()
+            self.exportData()
 
     def setForwards(self, forwards):
         if not self.draftHasStarted():
             self.num_forwards = forwards
             self.parent.totalsChanged()
+            self.exportData()
 
     def setDefense(self, defense):
         if not self.draftHasStarted():
             self.num_defense = defense
             self.parent.totalsChanged()
+            self.exportData()
 
     def setGoalies(self, goalies):
         if not self.draftHasStarted():
             self.num_goalies = goalies
             self.parent.totalsChanged()
+            self.exportData()
 
     def setImportPath(self, file_path):
         if not self.draftHasStarted():
@@ -62,7 +66,12 @@ class PoolData(object):
             self.parent.draftJustStarted()
 
     def exportData(self):
-        FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_rounds, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
+        if self.export_path:
+            FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_rounds, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
+
+    def storePlayer(self, player):
+        if self.export_path:
+            FileParser.appendPlayer(self.export_path, player)
 
     def getRemainingPlayers(self, team_num):
         team_players = self.teams_players[team_num]
@@ -135,10 +144,14 @@ class PoolData(object):
 
             if self.draftJustStarted():
                 self.parent.draftJustStarted()
+                self.exportData()
+            else:
+                self.storePlayer(player)
 
     def renameTeam(self, team_num, new_name):
         self.teams[team_num] = new_name
         self.parent.renameTeam(team_num)
+        self.exportData()
 
     def reorderTeam(self, team_num, new_position):
         # Cannot reorder the teams after the draft has started
@@ -146,6 +159,7 @@ class PoolData(object):
             self.draft_order.remove(team_num)
             self.draft_order.insert(new_position, team_num)
             self.parent.draftReordered()
+            self.exportData()
 
     def createNewTeam(self, team_name):
         # Cannot add a team after the draft has started
@@ -156,6 +170,7 @@ class PoolData(object):
             self.draft_order.append(team_num)
 
             self.parent.addTeam(team_num)
+            self.exportData()
 
     def removeTeam(self, team_num):
         # Cannot remove a team while the draft has started
@@ -165,6 +180,7 @@ class PoolData(object):
             self.draft_order.remove(team_num)
 
             self.parent.removeTeam(team_num)
+            self.exportData()
 
     def getNewTeamNum(self):
         max_num = 0
@@ -181,6 +197,7 @@ class PoolData(object):
         player.name = new_name
 
         self.parent.renamePlayer(team_num, player_index)
+        self.exportData()
 
     def repositionPlayer(self, team_num, player_index, new_pos):
         player_list = self.teams_players[team_num]
@@ -189,3 +206,4 @@ class PoolData(object):
         player.pos = new_pos
 
         self.parent.repositionPlayer(team_num, player_index)
+        self.exportData()
