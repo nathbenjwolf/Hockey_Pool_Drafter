@@ -143,7 +143,7 @@ class FileParser(object):
 
                 except IndexError:
                     # Ignore if on last round or 2nd last round
-                    assert (round >= max_rounds-1), "Error with teams_players data, " + str(team_num) + ":" + str(round)
+                    assert (round >= max_rounds-2), "Error with teams_players data, " + str(team_num) + ":" + str(round)
 
             # Reverse the order due to snake draft
             draft_order.reverse()
