@@ -162,6 +162,19 @@ class TeamPlayerPage(QtGui.QWidget):
 
             self.updateSelectedPlayer()
 
+    def updateTeam(self, team_num):
+        if self.team_num == team_num:
+            for player in self.data.teams_players[self.team_num]:
+                player_has_widget = False
+                for i in range(self.player_list.count()):
+                    player_widget = self.player_list.itemWidget(self.player_list.item(i))
+                    if player == player_widget.player:
+                        player_widget.updateLabels()
+                        player_has_widget = True
+                        break
+
+                if not player_has_widget:
+                    self.createPlayerEntry(player)
 
     def back(self):
         self.parent.returnToTeamPage()

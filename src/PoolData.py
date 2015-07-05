@@ -78,27 +78,33 @@ class PoolData(object):
     def checkPosition(self, player):
         # This function is dependent on the html structure of the nhl.com search page
 
+        poss = []
         player_name = player.name.replace(" ", "+")
         player_search_url = "http://www.nhl.com/ice/search.htm?tab=all&q=" + player_name
         r = requests.get(player_search_url)
         soup = BeautifulSoup(r.text)
         try:
-            pos = soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[1].getText()
+            # Hack, the position value is sometimes on a different path? (stupid nhl.com)
+            poss.append(soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[0].getText())
+            poss.append(soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[1].getText())
         except (IndexError, AttributeError):
-            # Player not found (trust the position provided)
-            return True
-
-        if pos == "Center" or pos == "Left Wing" or pos == "Right Wing":
-            player_pos = 'F'
-        elif pos == "Defenseman":
-            player_pos = 'D'
-        elif pos == "Goalie":
-            player_pos = 'G'
-        else:
-            # Player not a standard position
+            # Player not found
             return False
 
-        return player.pos == player_pos
+        for pos in poss:
+            if pos == "Center" or pos == "Left Wing" or pos == "Right Wing":
+                player_pos = 'F'
+            elif pos == "Defenseman":
+                player_pos = 'D'
+            elif pos == "Goalie":
+                player_pos = 'G'
+            else:
+                # Player position not found
+                continue
+
+            return player.pos == player_pos
+
+        return False
 
     def getPlayerImgs(self, player):
         # This function is dependent on the html structure of the nhl.com search page

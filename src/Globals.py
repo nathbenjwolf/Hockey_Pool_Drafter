@@ -12,5 +12,5 @@ class Globals:
     small_font = QtGui.QFont("Times", 10)
     small_bold_font = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
 
-    window_width = 900
-    window_height = 650
+    window_width = 1300
+    window_height = 800
