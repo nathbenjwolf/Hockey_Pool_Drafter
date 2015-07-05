@@ -220,6 +220,9 @@ class TeamTab(QtGui.QWidget):
 
         self.updateSelectedTeam()
 
+        if self.teamPlayerPage:
+            self.teamPlayerPage.updateTeam(team_num)
+
     def totalsChanged(self):
         for team_num in self.data.teams.keys():
             self.updateTeam(team_num)

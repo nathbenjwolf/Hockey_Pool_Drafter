@@ -1,4 +1,5 @@
 import sys
+import os
 from FileParser import FileParser
 import requests
 from bs4 import BeautifulSoup
@@ -77,27 +78,33 @@ class PoolData(object):
     def checkPosition(self, player):
         # This function is dependent on the html structure of the nhl.com search page
 
+        poss = []
         player_name = player.name.replace(" ", "+")
         player_search_url = "http://www.nhl.com/ice/search.htm?tab=all&q=" + player_name
         r = requests.get(player_search_url)
         soup = BeautifulSoup(r.text)
         try:
-            pos = soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[1].getText()
-        except IndexError:
+            # Hack, the position value is sometimes on a different path? (stupid nhl.com)
+            poss.append(soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[0].getText())
+            poss.append(soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[1].getText())
+        except (IndexError, AttributeError):
             # Player not found
             return False
 
-        if pos == "Center" or pos == "Left Wing" or pos == "Right Wing":
-            player_pos = 'F'
-        elif pos == "Defenseman":
-            player_pos = 'D'
-        elif pos == "Goalie":
-            player_pos = 'G'
-        else:
-            # Player not a standard position
-            return False
+        for pos in poss:
+            if pos == "Center" or pos == "Left Wing" or pos == "Right Wing":
+                player_pos = 'F'
+            elif pos == "Defenseman":
+                player_pos = 'D'
+            elif pos == "Goalie":
+                player_pos = 'G'
+            else:
+                # Player position not found
+                continue
 
-        return player.pos == player_pos
+            return player.pos == player_pos
+
+        return False
 
     def getRemainingPlayers(self, team_num):
         team_players = self.teams_players[team_num]
@@ -225,6 +232,7 @@ class PoolData(object):
         player = player_list[player_index]
 
         player.name = new_name
+        player.updatePlayerImgs()
 
         self.parent.renamePlayer(team_num, player_index)
         self.exportData()

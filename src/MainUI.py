@@ -23,27 +23,33 @@ class MainUI(QtGui.QDialog):
         self.config_tab = ConfigTab.ConfigTab(parent=self)
 
         self.tab_widget = QtGui.QTabWidget()
-        self.tab_widget.addTab(self.draft_tab, self.tr("Draft"))
+        # self.tab_widget.addTab(self.draft_tab, self.tr("Draft"))
         self.tab_widget.addTab(self.team_tab, self.tr("Team"))
         self.tab_widget.addTab(self.config_tab, self.tr("Config"))
         self.tab_widget.setFont(Globals.medium_font)
 
         self.tab_widget.currentChanged.connect(self.tabChanged)
 
-        okButton = QtGui.QPushButton(self.tr("OK"))
-        cancelButton = QtGui.QPushButton(self.tr("Cancel"))
+        self.tab_widget2 = QtGui.QTabWidget()
+        self.tab_widget2.addTab(self.draft_tab, self.tr("Draft"))
+        self.tab_widget2.setFont(Globals.medium_font)
 
-        self.connect(okButton, QtCore.SIGNAL("clicked()"), self, QtCore.SLOT("accept()"))
-        self.connect(cancelButton, QtCore.SIGNAL("clicked()"), self, QtCore.SLOT("reject()"))
+        # okButton = QtGui.QPushButton(self.tr("OK"))
+        # cancelButton = QtGui.QPushButton(self.tr("Cancel"))
+        #
+        # self.connect(okButton, QtCore.SIGNAL("clicked()"), self, QtCore.SLOT("accept()"))
+        # self.connect(cancelButton, QtCore.SIGNAL("clicked()"), self, QtCore.SLOT("reject()"))
+        #
+        # buttonLayout = QtGui.QHBoxLayout()
+        # buttonLayout.addStretch(1)
+        # buttonLayout.addWidget(okButton)
+        # buttonLayout.addWidget(cancelButton)
 
-        buttonLayout = QtGui.QHBoxLayout()
-        buttonLayout.addStretch(1)
-        buttonLayout.addWidget(okButton)
-        buttonLayout.addWidget(cancelButton)
-
-        mainLayout = QtGui.QVBoxLayout()
+        mainLayout = QtGui.QHBoxLayout()
+        mainLayout.addWidget(self.tab_widget2)
         mainLayout.addWidget(self.tab_widget)
-        mainLayout.addLayout(buttonLayout)
+        # mainLayout.addLayout(buttonLayout)
+
         self.setLayout(mainLayout)
 
         self.setWindowTitle(self.tr("Fantasy Hockey Pool"))

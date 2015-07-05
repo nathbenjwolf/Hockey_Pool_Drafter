@@ -7,27 +7,38 @@ from Globals import Globals
 
 
 class DraftedPlayer(QtGui.QWidget):
-    def __init__(self, pick_num, round_num, team_num, player, pos, parent):
+    def __init__(self, player, parent):
         super(DraftedPlayer, self).__init__(parent)
         self.data = parent.data
-        self.team_num = team_num
-        self.round_num = round_num
+        self.player = player
 
         self.allQHBoxLayout = QtGui.QHBoxLayout()
 
-        self.pick_num_label = QtGui.QLabel(str(pick_num))
+        self.pick_num_label = QtGui.QLabel(str(self.player.overall_draft_num))
         self.pick_num_label.setFont(Globals.medium_bold_font)
-        self.round_num_label = QtGui.QLabel(str(self.round_num))
+        self.round_num_label = QtGui.QLabel(str(self.player.draft_round+1))
         self.round_num_label.setFont(Globals.medium_bold_font)
-        self.team_label = QtGui.QLabel(self.data.teams[self.team_num])
+        self.team_label = QtGui.QLabel(self.data.teams[self.player.team])
         self.team_label.setFont(Globals.medium_font)
-        self.player_label = QtGui.QLabel(player)
+        self.player_label = QtGui.QLabel(self.player.name)
         self.player_label.setFont(Globals.medium_font)
-        self.position_label = QtGui.QLabel(pos)
+        self.position_label = QtGui.QLabel(self.player.pos)
         self.position_label.setFont(Globals.medium_font)
+
+        player_pixmap = QtGui.QPixmap()
+        player_pixmap.loadFromData(self.player.player_img)
+        self.player_img_label = QtGui.QLabel()
+        self.player_img_label.setPixmap(player_pixmap)
+
+        team_pixmap = QtGui.QPixmap()
+        team_pixmap.loadFromData(self.player.team_img)
+        self.team_img_label = QtGui.QLabel()
+        self.team_img_label.setPixmap(team_pixmap)
 
         self.allQHBoxLayout.addWidget(self.pick_num_label, 1)
         self.allQHBoxLayout.addWidget(self.round_num_label, 1)
+        self.allQHBoxLayout.addWidget(self.player_img_label, 5)
+        self.allQHBoxLayout.addWidget(self.team_img_label, 5)
         self.allQHBoxLayout.addWidget(self.team_label, 10)
         self.allQHBoxLayout.addWidget(self.player_label, 10)
         self.allQHBoxLayout.addWidget(self.position_label, 0)
@@ -35,9 +46,17 @@ class DraftedPlayer(QtGui.QWidget):
         self.setLayout(self.allQHBoxLayout)
 
     def updateLabels(self):
-        self.team_label.setText(self.data.teams[self.team_num])
-        self.player_label.setText(self.data.teams_players[self.team_num][self.round_num-1].name)
-        self.position_label.setText(self.data.teams_players[self.team_num][self.round_num-1].pos)
+        self.team_label.setText(self.data.teams[self.player.team])
+        self.player_label.setText(self.data.teams_players[self.player.team][self.player.draft_round].name)
+        self.position_label.setText(self.data.teams_players[self.player.team][self.player.draft_round].pos)
+
+        player_pixmap = QtGui.QPixmap()
+        player_pixmap.loadFromData(self.player.player_img)
+        self.player_img_label.setPixmap(player_pixmap)
+
+        team_pixmap = QtGui.QPixmap()
+        team_pixmap.loadFromData(self.player.team_img)
+        self.team_img_label.setPixmap(team_pixmap)
 
 
 class DraftTab(QtGui.QWidget):
@@ -160,7 +179,7 @@ class DraftTab(QtGui.QWidget):
         self.data.draftPlayer(player)
 
     def updatePlayerDrafted(self, player):
-        drafted_player = DraftedPlayer(player.overall_draft_num, player.draft_round+1, player.team, player.name, player.pos, self)
+        drafted_player = DraftedPlayer(player, self)
         myQListWidgetItem = QtGui.QListWidgetItem(self.list)
         myQListWidgetItem.setSizeHint(drafted_player.sizeHint())
         self.list.addItem(myQListWidgetItem)
@@ -176,7 +195,7 @@ class DraftTab(QtGui.QWidget):
         self.updatePickView()
         for i in range(self.list.count()):
             drafted_player = self.list.itemWidget(self.list.item(i))
-            if drafted_player.team_num == team_num:
+            if drafted_player.player.team == team_num:
                 drafted_player.updateLabels()
 
     def playerUpdate(self, team_num, player_index):
