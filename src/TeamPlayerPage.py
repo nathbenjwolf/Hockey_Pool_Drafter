@@ -18,7 +18,19 @@ class PlayerEntry(QtGui.QWidget):
         self.position_label = QtGui.QLabel(player.pos)
         self.position_label.setFont(Globals.medium_font)
 
+        player_pixmap = QtGui.QPixmap()
+        player_pixmap.loadFromData(self.player.player_img)
+        self.player_img_label = QtGui.QLabel()
+        self.player_img_label.setPixmap(player_pixmap)
+
+        team_pixmap = QtGui.QPixmap()
+        team_pixmap.loadFromData(self.player.team_img)
+        self.team_img_label = QtGui.QLabel()
+        self.team_img_label.setPixmap(team_pixmap)
+
         self.allQHBoxLayout.addWidget(self.draft_order_label, 2)
+        self.allQHBoxLayout.addWidget(self.player_img_label, 5)
+        self.allQHBoxLayout.addWidget(self.team_img_label, 5)
         self.allQHBoxLayout.addWidget(self.player_name_label, 20)
         self.allQHBoxLayout.addWidget(self.position_label, 1)
 
@@ -27,6 +39,14 @@ class PlayerEntry(QtGui.QWidget):
     def updateLabels(self):
         self.player_name_label.setText(self.player.name)
         self.position_label.setText(self.player.pos)
+
+        player_pixmap = QtGui.QPixmap()
+        player_pixmap.loadFromData(self.player.player_img)
+        self.player_img_label.setPixmap(player_pixmap)
+
+        team_pixmap = QtGui.QPixmap()
+        team_pixmap.loadFromData(self.player.team_img)
+        self.team_img_label.setPixmap(team_pixmap)
 
 
 class TeamPlayerPage(QtGui.QWidget):

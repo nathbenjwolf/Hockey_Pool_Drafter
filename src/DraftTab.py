@@ -25,16 +25,13 @@ class DraftedPlayer(QtGui.QWidget):
         self.position_label = QtGui.QLabel(self.player.pos)
         self.position_label.setFont(Globals.medium_font)
 
-        #Image stuff (clean up later)
-        player_img_data, team_img_data = self.data.getPlayerImgs(self.player)
-
         player_pixmap = QtGui.QPixmap()
-        player_pixmap.loadFromData(player_img_data)
+        player_pixmap.loadFromData(self.player.player_img)
         self.player_img_label = QtGui.QLabel()
         self.player_img_label.setPixmap(player_pixmap)
 
         team_pixmap = QtGui.QPixmap()
-        team_pixmap.loadFromData(team_img_data)
+        team_pixmap.loadFromData(self.player.team_img)
         self.team_img_label = QtGui.QLabel()
         self.team_img_label.setPixmap(team_pixmap)
 
@@ -52,6 +49,14 @@ class DraftedPlayer(QtGui.QWidget):
         self.team_label.setText(self.data.teams[self.player.team])
         self.player_label.setText(self.data.teams_players[self.player.team][self.player.draft_round].name)
         self.position_label.setText(self.data.teams_players[self.player.team][self.player.draft_round].pos)
+
+        player_pixmap = QtGui.QPixmap()
+        player_pixmap.loadFromData(self.player.player_img)
+        self.player_img_label.setPixmap(player_pixmap)
+
+        team_pixmap = QtGui.QPixmap()
+        team_pixmap.loadFromData(self.player.team_img)
+        self.team_img_label.setPixmap(team_pixmap)
 
 
 class DraftTab(QtGui.QWidget):
