@@ -131,6 +131,10 @@ class PoolData(object):
         return False
 
     def canDraftPlayer(self, team_num, player):
+        # check that the team exists
+        if team_num not in self.teams.keys():
+            return False
+
         # check if team can draft that player position
         remaining_picks = 0
         if player.pos == 'F':
