@@ -9,11 +9,9 @@ class PoolData(object):
 
         self.parent = parent
 
-        self.teams = {  0: "Team A",
-                        1: "Team B",
-                        2: "Team C"}
+        self.teams = {}
 
-        self.draft_order = [2, 0, 1]
+        self.draft_order = []
 
         self.teams_players = {}
         for team_num in self.teams.keys():
@@ -26,27 +24,27 @@ class PoolData(object):
         self.import_path = ""
         self.export_path = ""
 
-    def setRounds(self, rounds):
-        if not self.draftHasStarted():
-            self.num_rounds = rounds
-            self.parent.totalsChanged()
-            self.exportData()
+    def __setRounds(self):
+        self.num_rounds = self.num_forwards + self.num_defense + self.num_goalies
 
     def setForwards(self, forwards):
         if not self.draftHasStarted():
             self.num_forwards = forwards
+            self.__setRounds()
             self.parent.totalsChanged()
             self.exportData()
 
     def setDefense(self, defense):
         if not self.draftHasStarted():
             self.num_defense = defense
+            self.__setRounds()
             self.parent.totalsChanged()
             self.exportData()
 
     def setGoalies(self, goalies):
         if not self.draftHasStarted():
             self.num_goalies = goalies
+            self.__setRounds()
             self.parent.totalsChanged()
             self.exportData()
 
@@ -69,7 +67,7 @@ class PoolData(object):
 
     def exportData(self):
         if self.export_path:
-            FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_rounds, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
+            FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
 
     def storePlayer(self, player):
         if self.export_path:
@@ -224,7 +222,7 @@ class PoolData(object):
             self.exportData()
 
     def getNewTeamNum(self):
-        max_num = 0
+        max_num = -1
         for team in self.teams.keys():
             if team > max_num:
                 max_num = team

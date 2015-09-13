@@ -25,7 +25,7 @@ class FileParser(object):
         return teams, draft_order, rounds, forwards, defense, goalies, teams_players
 
     @staticmethod
-    def exportData(filename, teams, draft_order, rounds, forwards, defense, goalies, teams_players):
+    def exportData(filename, teams, draft_order, forwards, defense, goalies, teams_players):
         f = open(filename, 'w')
 
         with f:
@@ -41,7 +41,7 @@ class FileParser(object):
             f.write('\n')
 
             # Config Totals
-            totals_string = FileParser.__marshalTotals(rounds, forwards, defense, goalies)
+            totals_string = FileParser.__marshalTotals(forwards, defense, goalies)
             f.write(totals_string)
             f.write('\n')
 
@@ -96,17 +96,16 @@ class FileParser(object):
     @staticmethod
     def __unmarshalTotals(line):
         tokens = line.split(',')
-        rounds = int(tokens[0])
-        forwards = int(tokens[1])
-        defense = int(tokens[2])
-        goalies = int(tokens[3])
+        forwards = int(tokens[0])
+        defense = int(tokens[1])
+        goalies = int(tokens[2])
+        rounds = forwards + defense + goalies
 
         return rounds, forwards, defense, goalies
 
     @staticmethod
-    def __marshalTotals(rounds, forwards, defense, goalies):
-        totals_string = str(rounds) + ","
-        totals_string = totals_string + str(forwards) + ","
+    def __marshalTotals(forwards, defense, goalies):
+        totals_string = str(forwards) + ","
         totals_string = totals_string + str(defense) + ","
         totals_string = totals_string + str(goalies)
 

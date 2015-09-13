@@ -12,15 +12,12 @@ class ConfigTab(QtGui.QWidget):
 
         main_layout = QtGui.QVBoxLayout()
 
-        rounds_layout, self.total_rounds_spinbox = self.createNumberEntryWidget("Number of Rounds:", self.data.num_rounds)
-
         forwards_layout, self.total_forwards_spinbox = self.createNumberEntryWidget("Number of Forwards:", self.data.num_forwards)
 
         defensemen_layout, self.total_defensemen_spinbox = self.createNumberEntryWidget("Number of Defensemen:", self.data.num_defense)
 
         goalies_layout, self.total_goalies_spinbox = self.createNumberEntryWidget("Number of Goalies:", self.data.num_goalies)
 
-        self.total_rounds_spinbox.valueChanged.connect(self.roundsChanged)
         self.total_forwards_spinbox.valueChanged.connect(self.forwardsChanged)
         self.total_defensemen_spinbox.valueChanged.connect(self.defensemenChanged)
         self.total_goalies_spinbox.valueChanged.connect(self.goaliesChanged)
@@ -43,7 +40,6 @@ class ConfigTab(QtGui.QWidget):
         self.export_file_selection.clicked.connect(self.exportFileSelection)
         export_layout.addWidget(self.export_file_selection)
 
-        main_layout.addLayout(rounds_layout)
         main_layout.addLayout(forwards_layout)
         main_layout.addLayout(defensemen_layout)
         main_layout.addLayout(goalies_layout)
@@ -61,9 +57,6 @@ class ConfigTab(QtGui.QWidget):
         layout.addWidget(spinbox)
 
         return layout, spinbox
-
-    def roundsChanged(self):
-        self.data.setRounds(self.total_rounds_spinbox.value())
 
     def forwardsChanged(self):
         self.data.setForwards(self.total_forwards_spinbox.value())
@@ -88,7 +81,6 @@ class ConfigTab(QtGui.QWidget):
 
     # Reactor
     def draftStarted(self):
-        self.total_rounds_spinbox.setEnabled(False)
         self.total_forwards_spinbox.setEnabled(False)
         self.total_defensemen_spinbox.setEnabled(False)
         self.total_goalies_spinbox.setEnabled(False)
@@ -96,7 +88,6 @@ class ConfigTab(QtGui.QWidget):
 
     # Reactor
     def dataImported(self):
-        self.total_rounds_spinbox.setValue(self.data.num_rounds)
         self.total_forwards_spinbox.setValue(self.data.num_forwards)
         self.total_defensemen_spinbox.setValue(self.data.num_defense)
         self.total_goalies_spinbox.setValue(self.data.num_goalies)

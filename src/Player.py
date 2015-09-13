@@ -13,6 +13,18 @@ class Player(object):
         self.team_img = 0
         self.updatePlayerImgs()
 
+    def __eq__(self, player):
+        return  (self.overall_draft_num == player.overall_draft_num) and \
+                (self.draft_round == player.draft_round) and \
+                (self.team == player.team) and \
+                (self.name == player.name) and \
+                (self.pos == player.pos) and \
+                (self.player_img == player.player_img) and \
+                (self.team_img == player.team_img)
+
+    def __ne__(self, player):
+        return not self.__eq__(player)
+
     def updatePlayerImgs(self):
         self.player_img, self.team_img = self.getPlayerImgs()
 
@@ -38,3 +50,4 @@ class Player(object):
             team_img_data = requests.get("http://www1.nhl.com/images/logos/medium.png").content
 
         return player_img_data, team_img_data
+

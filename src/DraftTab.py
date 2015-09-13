@@ -107,8 +107,8 @@ class DraftTab(QtGui.QWidget):
         self.position_input.addItem("D")
         self.position_input.addItem("G")
 
-        draft_player_btn = QtGui.QPushButton("Draft Player")
-        draft_player_btn.clicked.connect(self.draftPlayer)
+        self.draft_player_btn = QtGui.QPushButton("Draft Player")
+        self.draft_player_btn.clicked.connect(self.draftPlayer)
 
         grid.addWidget(team_label, 1, 0)
         grid.addWidget(self.picking_team_label, 1, 1)
@@ -120,7 +120,7 @@ class DraftTab(QtGui.QWidget):
         grid.addWidget(position_label, 2, 2)
         grid.addWidget(self.position_input, 2, 3)
 
-        grid.addWidget(draft_player_btn, 3, 0, 3, 4)
+        grid.addWidget(self.draft_player_btn, 3, 0, 3, 4)
         picking_group_box.setLayout(grid)
 
         return picking_group_box
