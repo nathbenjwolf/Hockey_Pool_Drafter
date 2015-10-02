@@ -73,37 +73,6 @@ class PoolData(object):
         if self.export_path:
             FileParser.appendPlayer(self.export_path, player)
 
-    def checkPosition(self, player):
-        # This function is dependent on the html structure of the nhl.com search page
-
-        poss = []
-        player_name = player.name.replace(" ", "+")
-        player_search_url = "http://www.nhl.com/ice/search.htm?tab=all&q=" + player_name
-        r = requests.get(player_search_url)
-        soup = BeautifulSoup(r.text)
-        try:
-            # Hack, the position value is sometimes on a different path? (stupid nhl.com)
-            poss.append(soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[0].getText())
-            poss.append(soup.find_all("ul", "results")[0].li.div.find_all("div")[1].find_all("span")[1].getText())
-        except (IndexError, AttributeError):
-            # Player not found
-            return False
-
-        for pos in poss:
-            if pos == "Center" or pos == "Left Wing" or pos == "Right Wing":
-                player_pos = 'F'
-            elif pos == "Defenseman":
-                player_pos = 'D'
-            elif pos == "Goalie":
-                player_pos = 'G'
-            else:
-                # Player position not found
-                continue
-
-            return player.pos == player_pos
-
-        return False
-
     def getRemainingPlayers(self, team_num):
         team_players = self.teams_players[team_num]
         forwards_remaining = self.num_forwards
@@ -123,7 +92,7 @@ class PoolData(object):
     def isPlayerDrafted(self, player):
         for _, drafted_players in self.teams_players.iteritems():
             for drafted_player in drafted_players:
-                if player.name == drafted_player.name:
+                if player.name == drafted_player.name and player.pos == drafted_player.pos:
                     return True
 
         return False
@@ -131,30 +100,40 @@ class PoolData(object):
     def canDraftPlayer(self, team_num, player):
         # check that the team exists
         if team_num not in self.teams.keys():
-            return False
-
-        # check if team can draft that player position
-        remaining_picks = 0
-        if player.pos == 'F':
-            (remaining_picks, _, _) = self.getRemainingPlayers(team_num)
-        if player.pos == "D":
-            (_, remaining_picks, _) = self.getRemainingPlayers(team_num)
-        if player.pos == "G":
-            (_, _, remaining_picks) = self.getRemainingPlayers(team_num)
-
-        if remaining_picks <= 0:
-            return False
-
-        # check if a team has already drafted that player
-        if self.isPlayerDrafted(player):
+            self.parent.errorMessage("team doesn't exist")
             return False
 
         # check if total rounds exhausted
         if len(self.teams_players[team_num]) >= self.num_rounds:
+            self.parent.errorMessage("Total rounds exhausted")
+            return False
+
+        # check if team can draft that player position
+        remaining_picks = 0
+        error_message = ""
+        if player.pos == 'F':
+            (remaining_picks, _, _) = self.getRemainingPlayers(team_num)
+            error_message = self.teams[player.team] + " has no more forwards to pick"
+        if player.pos == "D":
+            (_, remaining_picks, _) = self.getRemainingPlayers(team_num)
+            error_message = self.teams[player.team] + " has no more defense to pick"
+        if player.pos == "G":
+            (_, _, remaining_picks) = self.getRemainingPlayers(team_num)
+            error_message = self.teams[player.team] + " has no more goalies to pick"
+
+        if remaining_picks <= 0:
+            self.parent.errorMessage(error_message)
+            return False
+
+        # check if a team has already drafted that player
+        if self.isPlayerDrafted(player):
+            self.parent.errorMessage(player.name + ", " + player.pos + " already drafted")
             return False
 
         # Check if the position is recorded correctly
-        if not self.checkPosition(player):
+        success, errMsg = player.checkPosition()
+        if not success:
+            self.parent.errorMessage(errMsg)
             return False
 
         return True
@@ -180,6 +159,7 @@ class PoolData(object):
         if self.canDraftPlayer(player.team, player):
             self.teams_players[player.team].append(player)
             self.parent.playerDrafted(player)
+            self.parent.successMessage(self.teams[player.team] + " drafted " + player.name + ", " + player.pos)
 
             if self.draftJustStarted():
                 self.parent.draftJustStarted()

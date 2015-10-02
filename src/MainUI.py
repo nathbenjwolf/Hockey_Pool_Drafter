@@ -45,10 +45,18 @@ class MainUI(QtGui.QDialog):
         # buttonLayout.addWidget(okButton)
         # buttonLayout.addWidget(cancelButton)
 
-        mainLayout = QtGui.QHBoxLayout()
-        mainLayout.addWidget(self.tab_widget2)
-        mainLayout.addWidget(self.tab_widget)
+        tabLayout = QtGui.QHBoxLayout()
+        tabLayout.addWidget(self.tab_widget2)
+        tabLayout.addWidget(self.tab_widget)
         # mainLayout.addLayout(buttonLayout)
+
+        self.message_label = QtGui.QLabel()
+        self.message_label.setFont(Globals.medium_bold_font)
+        self.message_label.setText("")
+
+        mainLayout = QtGui.QVBoxLayout()
+        mainLayout.addLayout(tabLayout)
+        mainLayout.addWidget(self.message_label)
 
         self.setLayout(mainLayout)
 
@@ -132,6 +140,14 @@ class MainUI(QtGui.QDialog):
 
         # Team tab
         self.team_tab.updateTeam(team_num)
+
+    def errorMessage(self, message):
+        self.message_label.setStyleSheet("QLabel { color : red; }")
+        self.message_label.setText(message)
+
+    def successMessage(self, message):
+        self.message_label.setStyleSheet("QLabel { color : green; }")
+        self.message_label.setText(message)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
