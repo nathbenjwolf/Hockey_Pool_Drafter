@@ -69,6 +69,9 @@ class PoolData(object):
         if self.export_path:
             FileParser.exportData(self.export_path, self.teams, self.draft_order, self.num_forwards, self.num_defense, self.num_goalies, self.teams_players)
 
+    def generatePrettyOutput(self, filename):
+        FileParser.generatePrettyOutput(filename, self.teams, self.draft_order, self.teams_players)
+
     def storePlayer(self, player):
         if self.export_path:
             FileParser.appendPlayer(self.export_path, player)

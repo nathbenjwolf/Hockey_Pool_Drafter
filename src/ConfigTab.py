@@ -40,11 +40,18 @@ class ConfigTab(QtGui.QWidget):
         self.export_file_selection.clicked.connect(self.exportFileSelection)
         export_layout.addWidget(self.export_file_selection)
 
+        pretty_output_layout = QtGui.QHBoxLayout()
+        pretty_output_layout.addWidget(QtGui.QLabel("Generate Pretty Output:"))
+        self.pretty_output_file_selection = QtGui.QPushButton("Select File")
+        self.pretty_output_file_selection.clicked.connect(self.generatePrettyOutput)
+        pretty_output_layout.addWidget(self.pretty_output_file_selection)
+
         main_layout.addLayout(forwards_layout)
         main_layout.addLayout(defensemen_layout)
         main_layout.addLayout(goalies_layout)
         main_layout.addLayout(import_layout)
         main_layout.addLayout(export_layout)
+        main_layout.addLayout(pretty_output_layout)
 
         self.setLayout(main_layout)
 
@@ -78,6 +85,12 @@ class ConfigTab(QtGui.QWidget):
             file_path = fdir.__str__() + '\FantasyHockeyDraftData.csv'
             self.data.setExportPath(file_path)
             self.export_file_label.setText(self.data.export_path)
+
+    def generatePrettyOutput(self):
+        fdir = QtGui.QFileDialog.getExistingDirectory(self, 'Output File Location')
+        if fdir:
+            file_path = fdir.__str__() + '\DraftOutput.csv'
+            self.data.generatePrettyOutput(file_path)
 
     # Reactor
     def draftStarted(self):

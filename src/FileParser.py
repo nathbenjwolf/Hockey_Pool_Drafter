@@ -163,3 +163,23 @@ class FileParser(object):
         player_string = player_string + player.pos
 
         return player_string
+
+    @staticmethod
+    def generatePrettyOutput(filename, teams, draft_order, teams_players):
+        f = open(filename, 'w')
+
+        with f:
+            for team_num in draft_order:
+                f.write(teams[team_num])
+                f.write(',')
+
+            f.write('\n')
+
+            for round in range(len(teams_players[0])):
+                for team_num in draft_order:
+                    try:
+                        f.write(teams_players[team_num][round].name)
+                        f.write(',')
+                    except(IndexError):
+                        return
+                f.write('\n')
