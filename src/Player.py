@@ -44,11 +44,12 @@ class Player(object):
                 player_img_data = requests.get("http://3.cdn.nhle.com/photos/mugs/default.jpg").content
 
             try:
-                team_img_url = soup.find_all("ul", "results")[0].find_all("li")[player_index-1].div.find_all("div")[1].a.img.get("src")
-                team_img_data = requests.get(team_img_url).content
+                team_img_data = soup.find_all("ul", "results")[0].find_all("li")[player_index-1].div.find_all("div")[1].a.div.img.get("title")
+                #team_img_data = requests.get(team_img_url).content
             except (IndexError, AttributeError):
                 # Could not find team image give default one
-                team_img_data = requests.get("http://www1.nhl.com/images/logos/medium.png").content
+                #team_img_data = requests.get("http://www1.nhl.com/images/logos/medium.png").content
+                team_img_data = "Default"
 
         else:
             # Player search fails for some reason (take default images)
