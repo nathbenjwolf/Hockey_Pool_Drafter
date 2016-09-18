@@ -82,14 +82,14 @@ class ConfigTab(QtGui.QWidget):
     def exportFileSelection(self):
         fdir = QtGui.QFileDialog.getExistingDirectory(self, 'Export File Location')
         if fdir:
-            file_path = fdir.__str__() + '\FantasyHockeyDraftData.csv'
+            file_path = fdir.__str__() + '/FantasyHockeyDraftData.csv'
             self.data.setExportPath(file_path)
             self.export_file_label.setText(self.data.export_path)
 
     def generatePrettyOutput(self):
         fdir = QtGui.QFileDialog.getExistingDirectory(self, 'Output File Location')
         if fdir:
-            file_path = fdir.__str__() + '\DraftOutput.csv'
+            file_path = fdir.__str__() + '/DraftOutput.csv'
             self.data.generatePrettyOutput(file_path)
 
     # Reactor

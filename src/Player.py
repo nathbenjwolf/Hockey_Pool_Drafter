@@ -35,7 +35,7 @@ class Player(object):
             player_name = self.name.replace(" ", "+")
             player_search_url = "http://www.nhl.com/ice/search.htm?tab=all&q=" + player_name
             r = requests.get(player_search_url)
-            soup = BeautifulSoup(r.text)
+            soup = BeautifulSoup(r.text, "html.parser")
             try:
                 player_img_url = soup.find_all("ul", "results")[0].find_all("li")[player_index-1].div.div.a.img.get("src")
                 player_img_data = requests.get(player_img_url).content
@@ -66,7 +66,7 @@ class Player(object):
         player_name = self.name.replace(" ", "+")
         player_search_url = "http://www.nhl.com/ice/search.htm?tab=all&q=" + player_name
         r = requests.get(player_search_url)
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         try:
             # Loop through all players till we run out of players
             i = 0
