@@ -4,6 +4,7 @@ import sys
 from PySide import QtGui, QtCore
 from Player import Player
 from Globals import Globals
+import os
 
 
 class DraftedPlayer(QtGui.QWidget):
@@ -30,7 +31,7 @@ class DraftedPlayer(QtGui.QWidget):
         self.player_img_label = QtGui.QLabel()
         self.player_img_label.setPixmap(player_pixmap)
 
-        team_pixmap = QtGui.QPixmap("E:/Programming/HockeyPoolDrafter/res/TeamImages/" + self.player.team_img + ".gif")
+        team_pixmap = QtGui.QPixmap(os.getcwd().rstrip('src') + '/res/TeamImages/' + self.player.team_img + ".gif")
         #team_pixmap.loadFromData(self.player.team_img)
         self.team_img_label = QtGui.QLabel()
         self.team_img_label.setPixmap(team_pixmap)
