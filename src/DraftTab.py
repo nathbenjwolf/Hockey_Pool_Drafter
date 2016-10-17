@@ -5,6 +5,8 @@ from PySide import QtGui, QtCore
 from Player import Player
 from Globals import Globals
 import os
+import requests
+import json
 
 
 class DraftedPlayer(QtGui.QWidget):
@@ -27,11 +29,11 @@ class DraftedPlayer(QtGui.QWidget):
         self.position_label.setFont(Globals.medium_font)
 
         player_pixmap = QtGui.QPixmap()
-        player_pixmap.loadFromData(self.player.player_img)
+        player_pixmap.loadFromData(self.player.getPlayerImg())
         self.player_img_label = QtGui.QLabel()
         self.player_img_label.setPixmap(player_pixmap)
 
-        team_pixmap = QtGui.QPixmap(os.getcwd().rstrip('src') + '/res/TeamImages/' + self.player.team_img + ".gif")
+        team_pixmap = QtGui.QPixmap(player.getTeamImg())
         #team_pixmap.loadFromData(self.player.team_img)
         self.team_img_label = QtGui.QLabel()
         self.team_img_label.setPixmap(team_pixmap)
@@ -52,7 +54,7 @@ class DraftedPlayer(QtGui.QWidget):
         self.position_label.setText(self.data.teams_players[self.player.team][self.player.draft_round].pos)
 
         player_pixmap = QtGui.QPixmap()
-        player_pixmap.loadFromData(self.player.player_img)
+        player_pixmap.loadFromData(self.player.getPlayerImg())
         self.player_img_label.setPixmap(player_pixmap)
 
         team_pixmap = QtGui.QPixmap()
@@ -77,8 +79,9 @@ class DraftTab(QtGui.QWidget):
         self.picking_team = self.getPickingTeam()
         self.round_num_label = QtGui.QLabel()
         self.picking_team_label = QtGui.QLabel()
-        self.player_input = QtGui.QLineEdit()
-        self.position_input = QtGui.QComboBox()
+        #self.player_input = QtGui.QLineEdit()
+        self.player_input = QtGui.QComboBox()
+        self.loading_players = False
 
         main_layout.addWidget(self.draftHistoryView())
         main_layout.addWidget(self.nextPickView())
@@ -103,13 +106,14 @@ class DraftTab(QtGui.QWidget):
         self.updatePickView()
 
         player_label = QtGui.QLabel(self.tr("Player:"))
-        position_label = QtGui.QLabel(self.tr("Pos:"))
-        self.position_input.addItem("F")
-        self.position_input.addItem("D")
-        self.position_input.addItem("G")
 
         self.draft_player_btn = QtGui.QPushButton("Draft Player")
         self.draft_player_btn.clicked.connect(self.draftPlayer)
+
+        #self.player_input.textChanged.connect(self.inputChanged)
+        self.player_input.editTextChanged.connect(self.inputChanged)
+        self.player_input.setEditable(True)
+        self.player_input.setCompleter(None)
 
         grid.addWidget(team_label, 1, 0)
         grid.addWidget(self.picking_team_label, 1, 1)
@@ -117,9 +121,7 @@ class DraftTab(QtGui.QWidget):
         grid.addWidget(self.round_num_label, 1, 3)
 
         grid.addWidget(player_label, 2, 0)
-        grid.addWidget(self.player_input, 2, 1)
-        grid.addWidget(position_label, 2, 2)
-        grid.addWidget(self.position_input, 2, 3)
+        grid.addWidget(self.player_input, 2, 1, 1, 3)
 
         grid.addWidget(self.draft_player_btn, 3, 0, 3, 4)
         picking_group_box.setLayout(grid)
@@ -176,7 +178,12 @@ class DraftTab(QtGui.QWidget):
             return self.round_num * len(self.data.teams) + (len(self.data.teams) - self.round_pick)
 
     def draftPlayer(self):
-        player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, self.player_input.text().__str__(), self.position_input.currentText().__str__())
+        if self.player_input.currentIndex() == -1:
+            self.parent.errorMessage(self.player_input.currentText() + " is not in NHL database")
+            return
+        player = self.player_input.itemData(self.player_input.currentIndex(), Globals.player_data_role)
+        print player.id
+        print player.nhl_team
         self.data.draftPlayer(player)
 
     def updatePlayerDrafted(self, player):
@@ -232,3 +239,50 @@ class DraftTab(QtGui.QWidget):
             draft_order.reverse()
 
 
+    def inputChanged(self):
+        if len(self.player_input.currentText()) < 4:
+            self.player_input.clear()
+            return
+        elif self.loading_players:
+            return
+        else:
+            player_url = "https://suggest.svc.nhl.com/svc/suggest/v1/minactiveplayers/" + self.player_input.currentText() + "/99999"
+            r = requests.get(player_url)
+            self.setPlayersFound( self.parsePlayerList(r.content) )
+
+
+    def setPlayersFound(self, players):
+        self.loading_players = True
+        player_input_text = self.player_input.currentText()
+        self.player_input.clear()
+        model = QtGui.QStandardItemModel()
+        view = QtGui.QTableView()
+        for player in players:
+            nameItem = QtGui.QStandardItem(player.name)
+            nameItem.setData(player, QtCore.Qt.UserRole + 1)
+            posItem = QtGui.QStandardItem(player.pos)
+            teamItem = QtGui.QStandardItem(player.nhl_team)
+            model.appendRow([nameItem, posItem, teamItem])
+        self.player_input.setModel(model)
+        self.player_input.setView(view)
+        self.player_input.setEditText(player_input_text)
+        self.player_input.showPopup()
+        self.loading_players = False
+
+    def parsePlayerList(self, content):
+        players = []
+        players_raw = json.loads(content)['suggestions']
+        for player_raw in players_raw:
+            player_data = player_raw.split('|')
+
+            player_id = player_data[0]
+            player_name = player_data[2] + ' ' + player_data[1]
+            player_team = player_data[11]
+            player_pos = player_data[12]
+            player_page_url = player_data[14]
+
+            player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, player_id, player_team, player_name, player_pos, player_page_url)
+
+            players.append(player)
+
+        return players

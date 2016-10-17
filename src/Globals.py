@@ -1,6 +1,6 @@
 __author__ = 'Nathan'
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 class Globals:
     large_font = QtGui.QFont("Times", 30)
@@ -11,6 +11,8 @@ class Globals:
 
     small_font = QtGui.QFont("Times", 10)
     small_bold_font = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+
+    player_data_role = QtCore.Qt.UserRole + 1
 
     window_width = 1300
     window_height = 800

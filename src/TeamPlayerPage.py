@@ -19,12 +19,12 @@ class PlayerEntry(QtGui.QWidget):
         self.position_label.setFont(Globals.medium_font)
 
         player_pixmap = QtGui.QPixmap()
-        player_pixmap.loadFromData(self.player.player_img)
+        player_pixmap.loadFromData(self.player.getPlayerImg())
         self.player_img_label = QtGui.QLabel()
         self.player_img_label.setPixmap(player_pixmap)
 
-        team_pixmap = QtGui.QPixmap()
-        team_pixmap.loadFromData(self.player.team_img)
+        team_pixmap = QtGui.QPixmap(self.player.getTeamImg())
+        #team_pixmap.loadFromData(self.player.team_img)
         self.team_img_label = QtGui.QLabel()
         self.team_img_label.setPixmap(team_pixmap)
 
@@ -41,11 +41,11 @@ class PlayerEntry(QtGui.QWidget):
         self.position_label.setText(self.player.pos)
 
         player_pixmap = QtGui.QPixmap()
-        player_pixmap.loadFromData(self.player.player_img)
+        player_pixmap.loadFromData(self.player.getPlayerImg())
         self.player_img_label.setPixmap(player_pixmap)
 
-        team_pixmap = QtGui.QPixmap()
-        team_pixmap.loadFromData(self.player.team_img)
+        team_pixmap = QtGui.QPixmap(self.player.getTeamImg())
+        #team_pixmap.loadFromData(self.player.team_img)
         self.team_img_label.setPixmap(team_pixmap)
 
 

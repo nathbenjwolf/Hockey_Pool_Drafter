@@ -95,7 +95,7 @@ class PoolData(object):
     def isPlayerDrafted(self, player):
         for _, drafted_players in self.teams_players.iteritems():
             for drafted_player in drafted_players:
-                if player.name == drafted_player.name and player.pos == drafted_player.pos:
+                if player.id == drafted_player.id:
                     return True
 
         return False
@@ -114,13 +114,13 @@ class PoolData(object):
         # check if team can draft that player position
         remaining_picks = 0
         error_message = ""
-        if player.pos == 'F':
+        if player.getPos() == 'F':
             (remaining_picks, _, _) = self.getRemainingPlayers(team_num)
             error_message = self.teams[player.team] + " has no more forwards to pick"
-        if player.pos == "D":
+        if player.getPos() == "D":
             (_, remaining_picks, _) = self.getRemainingPlayers(team_num)
             error_message = self.teams[player.team] + " has no more defense to pick"
-        if player.pos == "G":
+        if player.getPos() == "G":
             (_, _, remaining_picks) = self.getRemainingPlayers(team_num)
             error_message = self.teams[player.team] + " has no more goalies to pick"
 
@@ -131,12 +131,6 @@ class PoolData(object):
         # check if a team has already drafted that player
         if self.isPlayerDrafted(player):
             self.parent.errorMessage(player.name + ", " + player.pos + " already drafted")
-            return False
-
-        # Check if the position is recorded correctly
-        success, errMsg = player.checkPosition()
-        if not success:
-            self.parent.errorMessage(errMsg)
             return False
 
         return True
