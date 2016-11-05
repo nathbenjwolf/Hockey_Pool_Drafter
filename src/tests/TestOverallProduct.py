@@ -41,9 +41,7 @@ class TestOverallProduct(unittest.TestCase):
     def draftPlayers(self, app, players):
         for player in players:
             QTest.keyClicks(app.draft_tab.player_input, player.name, 0, 10)
-            self.assertEquals(app.draft_tab.player_input.text().__str__(), player.name)
-            app.draft_tab.position_input.setCurrentIndex(app.draft_tab.position_input.findText(player.pos))
-            self.assertEquals(app.draft_tab.position_input.currentText().__str__(), player.pos)
+            self.assertEquals(app.draft_tab.player_input.currentText().__str__(), player.name)
             QTest.mouseClick(app.draft_tab.draft_player_btn, Qt.LeftButton)
 
     def confirmPlayersDrafted(self, app, players):

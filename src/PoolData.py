@@ -2,6 +2,8 @@ import sys
 import os
 from FileParser import FileParser
 import requests
+import json
+from Player import Player
 from bs4 import BeautifulSoup
 
 class PoolData(object):
@@ -210,8 +212,16 @@ class PoolData(object):
         player_list = self.teams_players[team_num]
         player = player_list[player_index]
 
-        player.name = new_name
-        player.updatePlayerImgs()
+        new_player = self.queryPlayerInfo(new_name, player.getPos())
+        # Update necessary info on the player class
+        player.name = new_player.name
+        player.id = new_player.id
+        player.nhl_team = new_player.nhl_team
+        player.page_url = new_player.page_url
+
+        # Clear images so it re-requests new ones
+        player.player_img = None
+        player.team_img = None
 
         self.parent.renamePlayer(team_num, player_index)
         self.exportData()
@@ -220,7 +230,55 @@ class PoolData(object):
         player_list = self.teams_players[team_num]
         player = player_list[player_index]
 
+        new_player = self.queryPlayerInfo(player.name, new_pos)
+        # Update necessary info on the player class
         player.pos = new_pos
+        player.id = new_player.id
+        player.nhl_team = new_player.nhl_team
+        player.page_url = new_player.page_url
+
+        # Clear images so it re-requests new ones
+        player.player_img = None
+        player.team_img = None
 
         self.parent.repositionPlayer(team_num, player_index)
         self.exportData()
+
+    def queryPlayerInfo(self, name, pos):
+        playerList = self.getPlayerList(name)
+        if len(playerList) != 0:
+            # > 1 Return the first player which matches the position
+            for player in playerList:
+                if player.getPos() == pos:
+                    return player
+
+        return Player(None, None, name, None, None)
+
+    def getPlayerList(self, name):
+        player_url = "https://suggest.svc.nhl.com/svc/suggest/v1/minactiveplayers/" + name + "/99999"
+        r = requests.get(player_url)
+        return self.parsePlayerList(r.content)
+
+    def parsePlayerList(self, content):
+        players = []
+        players_raw = json.loads(content)['suggestions']
+        for player_raw in players_raw:
+            player_data = player_raw.split('|')
+
+            player_id = player_data[0]
+            player_name = player_data[2] + ' ' + player_data[1]
+            player_team = player_data[11]
+            player_pos = self.simplifyPos(player_data[12])
+            player_page_url = player_data[14]
+
+            player = Player(player_id, player_team, player_name, player_pos, player_page_url)
+
+            players.append(player)
+
+        return players
+
+    def simplifyPos(self, pos):
+        if pos in ['C', 'R', 'L']:
+            return 'F'
+        else:
+            return pos

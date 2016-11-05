@@ -57,8 +57,8 @@ class DraftedPlayer(QtGui.QWidget):
         player_pixmap.loadFromData(self.player.getPlayerImg())
         self.player_img_label.setPixmap(player_pixmap)
 
-        team_pixmap = QtGui.QPixmap()
-        team_pixmap.loadFromData(self.player.team_img)
+        team_pixmap = QtGui.QPixmap(self.player.getTeamImg())
+        #team_pixmap.loadFromData(self.player.team_img)
         self.team_img_label.setPixmap(team_pixmap)
 
 
@@ -182,6 +182,9 @@ class DraftTab(QtGui.QWidget):
             self.parent.errorMessage(self.player_input.currentText() + " is not in NHL database")
             return
         player = self.player_input.itemData(self.player_input.currentIndex(), Globals.player_data_role)
+        player.overall_draft_num = self.getOverallPickNum()
+        player.draft_round = self.round_num
+        player.team = self.picking_team
         print player.id
         print player.nhl_team
         self.data.draftPlayer(player)
@@ -246,9 +249,7 @@ class DraftTab(QtGui.QWidget):
         elif self.loading_players:
             return
         else:
-            player_url = "https://suggest.svc.nhl.com/svc/suggest/v1/minactiveplayers/" + self.player_input.currentText() + "/99999"
-            r = requests.get(player_url)
-            self.setPlayersFound( self.parsePlayerList(r.content) )
+            self.setPlayersFound(self.data.getPlayerList(self.player_input.currentText()))
 
 
     def setPlayersFound(self, players):
@@ -269,20 +270,3 @@ class DraftTab(QtGui.QWidget):
         self.player_input.showPopup()
         self.loading_players = False
 
-    def parsePlayerList(self, content):
-        players = []
-        players_raw = json.loads(content)['suggestions']
-        for player_raw in players_raw:
-            player_data = player_raw.split('|')
-
-            player_id = player_data[0]
-            player_name = player_data[2] + ' ' + player_data[1]
-            player_team = player_data[11]
-            player_pos = player_data[12]
-            player_page_url = player_data[14]
-
-            player = Player(self.getOverallPickNum(), self.round_num, self.picking_team, player_id, player_team, player_name, player_pos, player_page_url)
-
-            players.append(player)
-
-        return players
