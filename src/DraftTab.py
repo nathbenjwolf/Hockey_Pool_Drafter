@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+from threading import Event
 from PySide import QtGui, QtCore
 from Player import Player
 from Globals import Globals
@@ -67,6 +68,12 @@ class DraftTab(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.parent = parent
         self.data = parent.pool_data
+
+        # thread variables
+        self.stopped = Event()
+        self.thread = self.findPlayersThread(self.stopped, self.data, 1)
+        self.thread.thread_finished.connect(self.setPlayersFound)
+        self.thread.start()
 
         main_layout = QtGui.QVBoxLayout()
 
@@ -249,8 +256,40 @@ class DraftTab(QtGui.QWidget):
         elif self.loading_players:
             return
         else:
-            self.setPlayersFound(self.data.getPlayerList(self.player_input.currentText()))
+            # Stop previous name search
+            self.stopped.set()
+            # Start new name search
+            self.thread.setName(self.player_input.currentText())
 
+
+
+    class findPlayersThread(QtCore.QThread):
+
+        thread_finished = QtCore.Signal(object)
+
+        def __init__(self, event, data, delay):
+            QtCore.QThread.__init__(self)
+            self.stopped = event
+            self.data = data
+            self.delay = delay
+            self.name = None
+            self.newRun = False
+
+        def run(self):
+            while True:
+                if not self.stopped.wait(self.delay):
+                    if self.newRun:
+                        players = self.data.getPlayerList(self.name)
+                        self.thread_finished.emit(players)
+                        self.newRun = False
+                else:
+                    # Stopped was set
+                    self.stopped.clear()
+
+
+        def setName(self, name):
+            self.name = name
+            self.newRun = True
 
     def setPlayersFound(self, players):
         self.loading_players = True
@@ -267,6 +306,9 @@ class DraftTab(QtGui.QWidget):
         self.player_input.setModel(model)
         self.player_input.setView(view)
         self.player_input.setEditText(player_input_text)
-        self.player_input.showPopup()
+        if len(players) != 1 or player_input_text != players[0].name:
+            # If we match the players name exactly don't bother showing popup
+            # This occurs when we select a player from the drop down
+            self.player_input.showPopup()
         self.loading_players = False
 
