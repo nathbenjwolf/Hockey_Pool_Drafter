@@ -152,15 +152,18 @@ class FileParser(object):
     @staticmethod
     def __unmarshalPlayer(line):
         t = line.split('.')
-        return Player(int(t[0]), int(t[1]), int(t[2]), t[3], t[4])
+        return Player(int(t[0]), t[1], t[2], t[3], t[4], int(t[5]), int(t[6]), int(t[7]))
 
     @staticmethod
     def __marshalPlayer(player):
-        player_string = str(player.overall_draft_num) + "."
-        player_string = player_string + str(player.draft_round) + "."
-        player_string = player_string + str(player.team) + "."
-        player_string = player_string + player.name + "."
-        player_string = player_string + player.pos
+        player_string = str(player.id) + "."
+        player_string += player.nhl_team + "."
+        player_string += player.name + "."
+        player_string += player.pos + "."
+        player_string += player.page_url + "."
+        player_string += str(player.overall_draft_num) + "."
+        player_string += str(player.draft_round) + "."
+        player_string += str(player.team)
 
         return player_string
 
@@ -175,11 +178,14 @@ class FileParser(object):
 
             f.write('\n')
 
-            for round in range(len(teams_players[0])):
+            for round in range(max(len(teams_players[0]),len(teams_players[len(teams_players)-1]))):
                 for team_num in draft_order:
                     try:
                         f.write(teams_players[team_num][round].name)
+                        f.write(" " + teams_players[team_num][round].pos)
+                        f.write(" " + teams_players[team_num][round].nhl_team)
                         f.write(',')
                     except(IndexError):
-                        return
+                        f.write(',')
+                        continue
                 f.write('\n')

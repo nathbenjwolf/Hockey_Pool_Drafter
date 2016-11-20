@@ -46,7 +46,7 @@ class Player(object):
 
     def updatePlayerImg(self):
         if self.id:
-            player_img_url = "https://nhl.bamcontent.com/images/headshots/current/168x168/" + self.id + ".jpg"
+            player_img_url = "https://nhl.bamcontent.com/images/headshots/current/168x168/" + str(self.id) + ".jpg"
             result = requests.get(player_img_url)
         if not self.id or result.status_code == 404:
             if self.getPos() == 'G':

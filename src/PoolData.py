@@ -265,7 +265,7 @@ class PoolData(object):
         for player_raw in players_raw:
             player_data = player_raw.split('|')
 
-            player_id = player_data[0]
+            player_id = int(player_data[0])
             player_name = player_data[2] + ' ' + player_data[1]
             player_team = player_data[11]
             player_pos = self.simplifyPos(player_data[12])
