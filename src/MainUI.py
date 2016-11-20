@@ -149,6 +149,11 @@ class MainUI(QtGui.QDialog):
         self.message_label.setStyleSheet("QLabel { color : green; }")
         self.message_label.setText(message)
 
+    def closeEvent(self, *args, **kwargs):
+        self.draft_tab.thread.active = False
+        self.draft_tab.thread.quit()
+        self.draft_tab.thread.wait()
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 

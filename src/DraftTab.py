@@ -269,6 +269,7 @@ class DraftTab(QtGui.QWidget):
 
         def __init__(self, event, data, delay):
             QtCore.QThread.__init__(self)
+            self.active = True
             self.stopped = event
             self.data = data
             self.delay = delay
@@ -276,7 +277,7 @@ class DraftTab(QtGui.QWidget):
             self.newRun = False
 
         def run(self):
-            while True:
+            while self.active:
                 if not self.stopped.wait(self.delay):
                     if self.newRun:
                         players = self.data.getPlayerList(self.name)
